@@ -24,7 +24,6 @@ function tooMany(headers) {
   return { status: 429, ok: false, headers: new Headers(headers), text: async () => 'rate limited' };
 }
 
-// Scores come from `scoreOf(path)`; `responses` overrides the reply to the nth request.
 function fakeJev({ scoreOf = () => 0.5, responses = [] } = {}) {
   const requests = [];
   let inFlight = 0;

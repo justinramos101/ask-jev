@@ -10,7 +10,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL_DIR = join(HERE, '..', 'skills', 'ask-jev');
 const SKILL_FILES = ['SKILL.md', 'scripts/ask-jev.mjs'];
 const SKILL_HOMES = ['.claude/skills/ask-jev', '.agents/skills/ask-jev'];
-const READ_COMMAND = /(?:^|[\s;&|('"])(?:cat|head|tail|nl|less|bat|sed\s+-n)\s/g;
+const READ_COMMAND = /(?<!\|\s*)(?:^|[\s;&('"])(?:cat|head|tail|nl|less|bat|sed\s+-n)\s/g;
 
 const { values: opts } = parseArgs({
   options: {
@@ -117,8 +117,6 @@ function countReads(commands) {
   return commands.reduce((sum, command) => sum + [...command.matchAll(READ_COMMAND)].length, 0);
 }
 
-// An answer names a file by its basename when that basename is unique in the
-// fixture, otherwise by its last two path segments (src/client/utils.ts).
 function namesFile(text, path, basenameCounts) {
   const name = basename(path);
   const needle = basenameCounts.get(name) > 1 ? path.split('/').slice(-2).join('/') : name;
