@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync, spawn } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, appendFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, appendFileSync } from 'node:fs';
 import { homedir, platform, tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +8,6 @@ import { parseArgs } from 'node:util';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL_DIR = join(HERE, '..', 'skills', 'ask-jev');
-const SKILL_FILES = ['SKILL.md', 'scripts/ask-jev.mjs'];
 const SKILL_HOMES = ['.claude/skills/ask-jev', '.agents/skills/ask-jev'];
 const READ_COMMAND = /(?<!\|\s*)(?:^|[\s;&('"])(?:cat|head|tail|nl|less|bat|sed\s+-n)\s/g;
 
@@ -150,10 +149,7 @@ function freshCopy(cache, root) {
 
 function installSkill(copy) {
   for (const home of SKILL_HOMES) {
-    for (const file of SKILL_FILES) {
-      mkdirSync(dirname(join(copy, home, file)), { recursive: true });
-      copyFileSync(join(SKILL_DIR, file), join(copy, home, file));
-    }
+    cpSync(SKILL_DIR, join(copy, home), { recursive: true });
   }
   appendFileSync(join(copy, '.git', 'info', 'exclude'), '.claude/\n.agents/\n');
 }

@@ -1,21 +1,53 @@
 ---
 name: ask-jev
-description: Rank which files matter before reading them. Use when finding where something is handled, defined or configured, how a behavior works, or which files a change touches would mean opening more than 3 files, especially in an unfamiliar codebase. Pass a goal and candidate paths; get back paths with relevance scores and read only the top few. Not for a file already named, a pasted snippet, git history or running commands.
+description: Use Jev for bounded judgments over supplied context. Use when choosing among plausible next steps or approaches, classifying or routing requests, scoring candidates against a rubric, checking whether evidence supports a claim, or ranking relevant material. Supply the context and explicit questions to get typed answers with probabilities. Also use when the user asks to consult Jev. Skip deterministic lookups, calculations, and commands whose result you can observe directly.
 ---
 
-# ask-jev
+# Ask Jev
 
-The script reads the candidate files, asks Jev how likely each one is needed for the goal, and prints the best paths with scores. Only the scores reach your context.
+Use this skill to consult Jev during your own work. Jev evaluates context and returns structured judgments. You supply the evidence, alternatives, and criteria. You interpret the answers and choose the next step.
 
-1. Pick candidates. A source directory is usually enough (`src`). Narrow with a glob (`'src/**/*.ts'`) or with the files from `rg -l <term>`. In a git repo, drop tests with `':!*.test.*'`. At most 300 files.
-2. Run from the project root. The script is `scripts/ask-jev.mjs` in this skill's directory.
+## Frame the judgment
 
-   ```sh
-   node <this skill's directory>/scripts/ask-jev.mjs files --goal "<what you need to find or change, one sentence>" src ':!*.test.*'
-   ```
+1. Gather the context that could distinguish the alternatives. Include the goal, constraints, relevant evidence, and candidate descriptions. Jev cannot inspect your workspace or conversation unless you include that material.
+2. Choose a question type.
+   - Use `choice` to select one option, such as a next investigation, implementation approach, request category, or tool. Include an `other` or `insufficient_evidence` option when the alternatives might not cover the case.
+   - Use `score` to rate a candidate on an ordered rubric, such as completeness, relevance, or severity. Describe each level concretely. For ranking, ask one question per candidate with the same rubric.
+   - Use `noul` to judge a yes/no proposition, such as whether a passage supports a claim or a proposed change satisfies a requirement.
+3. Ask one focused question per judgment. Split a complex decision into factors, then combine the answers using the task's priorities. Put independent questions about the same context in one request. Questions cannot see each other's answers.
 
-   Options: `--top 8` (how many paths), `--min 0.3` (lowest score shown).
-3. Read the output. The first line counts files and requests. Each other line is `score  path`, highest first. Open the top files in order and stop once you have the answer.
-4. If the output says no file reached the minimum, rephrase the goal with the concrete behavior or name, or widen the candidates, and run once more. After that, search by hand.
+Keep factual observations in `state` and judgment instructions in `questions`. Name the target explicitly in each question. Question IDs identify results but are not shown to the model. Use your own reasoning to generate alternatives or explain tradeoffs. Jev does not generate prose or code.
 
-The script needs `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment. If it exits with an error, read the message on stderr and fall back to searching by hand.
+## Call Jev
+
+Write a JSON file with `state` and a nonempty `questions` map. Use a string, object, or array for `state`. Read [the request reference](references/request.md) for all three question types, or adapt [the mixed decision example](examples/decision.json).
+
+Run the script from this skill's directory by its absolute path:
+
+```sh
+node <skill-directory>/scripts/ask-jev.mjs ask /tmp/jev-request.json
+```
+
+To send JSON through stdin:
+
+```sh
+node <skill-directory>/scripts/ask-jev.mjs ask - < /tmp/jev-request.json
+```
+
+Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment. If both exist, the TypeSafe key takes precedence. Use `--provider typesafe` or `--provider vercel` to select one explicitly. The script needs Node 18 or later.
+
+## Use the answers
+
+Read the JSON on stdout. Each answer appears under the question ID in `answers`.
+
+- For `choice`, inspect `choice`, the per-option `probabilities`, and `confidence`. A close split is a reason to investigate the alternatives further.
+- For `score`, inspect `score`, `legend`, `probabilities`, and `confidence`. The score ranges from zero to the last rubric index and can be fractional. It is not a probability of success.
+- For `noul`, read `noul` as the probability of yes. Values near zero support no, values near one support yes, and values near the middle are uncertain. Noul has no separate confidence field.
+
+Treat the result as evidence for the decision. Confidence does not guarantee correctness. If evidence is missing or answers conflict, gather the missing facts or revise an ambiguous question. Do not repeatedly ask the same question until it agrees with your preference. Use thresholds appropriate to the consequence of a wrong answer, rather than one cutoff for every task.
+
+Keep action execution in the calling agent. A selected option does not grant permission to perform it. If Jev fails or credentials are unavailable, report that limitation and continue with direct investigation or your own reasoning. Do not claim Jev evaluated a decision when the call failed.
+
+## Rank candidate files
+
+For file discovery, use the optional `files` helper. It samples file contents and prints relevance scores. Read [the file-ranking instructions](references/files.md) before using it. File ranking is one use case; general decisions use `ask`.

@@ -224,3 +224,13 @@ test('refuses more than 300 candidates and asks to narrow', async () => {
     "ask-jev: 301 candidate files; ask-jev scores at most 300. Narrow the paths: a subdirectory, a glob such as 'src/**/*.ts', or the files from rg -l <term>.",
   );
 });
+
+test('rejects invalid file relevance probabilities instead of ranking them', async () => {
+  const cwd = project({ 'a.ts': 'a' });
+  for (const score of [-0.1, 1.1]) {
+    const result = await run(['files', '--goal', 'x', 'a.ts'], { cwd, jev: fakeJev({ scoreOf: () => score }) });
+    assert.equal(result.code, 1);
+    assert.equal(result.stdout, '');
+    assert.match(result.stderr, /invalid noul/);
+  }
+});

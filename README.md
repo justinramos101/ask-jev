@@ -1,77 +1,80 @@
 # ask-jev
 
-ask-jev is an agent skill that picks which files to read before the agent reads them. The agent passes a goal and candidate paths to a script. The script reads the files, asks Jev how likely each one is needed for the goal, and prints the paths with scores. The agent's context gets the scores, not the file contents.
+An agent skill for consulting Jev during a task. Give Jev the context and bounded questions. Use its structured answers to choose among approaches, route requests, rate candidates, check claims against evidence, or rank relevant material.
 
-Jev is a fast model from TypeSafe that answers typed questions about a `state` with probabilities. It never writes text. ask-jev asks one yes-or-no question per file.
+Jev supports three question types. `choice` selects an explicit option. `score` rates context against ordered descriptions. `noul` returns the probability that a proposition is true. All three can share one request. See the [TypeSafe documentation](https://docs.typesafe.ai/introduction).
 
-The skill is a standard `SKILL.md` plus a Node script with no dependencies. It works in Claude Code, which reads `.claude/skills/`, and in Codex, which reads `.agents/skills/`.
+The agent supplies evidence and interprets the results. Jev does not generate explanations, inspect a workspace, or execute a selected action.
 
 ## Install
 
-Copy or symlink `skills/ask-jev` into the skills directory of each agent you use:
+Copy or symlink the complete `skills/ask-jev` directory into the skills directory of each agent you use:
 
 ```sh
 ln -s "$PWD/skills/ask-jev" ~/.claude/skills/ask-jev
 ln -s "$PWD/skills/ask-jev" ~/.agents/skills/ask-jev
 ```
 
-For one project only, use `<project>/.claude/skills/ask-jev` and `<project>/.agents/skills/ask-jev` instead.
+For one project, use `<project>/.claude/skills/ask-jev` or `<project>/.agents/skills/ask-jev` instead.
 
-The script needs Node 18 or later.
+The runner requires Node 18 or later and has no package dependencies.
 
 ## Set a key
 
-The script reads one of these variables from the environment:
+Set one of these environment variables:
 
 - `TYPESAFE_API_KEY` sends requests to `https://api.typesafe.ai/v1/systemone` with model `jev-latest`.
 - `AI_GATEWAY_API_KEY` sends requests through the Vercel AI Gateway with model `typesafe-ai/jev`.
 
-With both set, the script uses the TypeSafe key. Pass `--provider typesafe` or `--provider vercel` to choose. In Claude Code, you can put the key in the `env` block of `~/.claude/settings.json`.
+When both exist, the runner uses the TypeSafe key. Pass `--provider typesafe` or `--provider vercel` to select one explicitly. Keep keys in the environment, outside request JSON.
 
-## Run the script
+## Ask for a decision
 
-```sh
-node skills/ask-jev/scripts/ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] <path|dir|glob>...
-```
-
-For example, in a checkout of `honojs/hono`:
+Adapt [the mixed decision example](skills/ask-jev/examples/decision.json). It asks which subsystem to investigate, how much functionality is unavailable, and whether the logs support a storage failure.
 
 ```sh
-$ node ~/.claude/skills/ask-jev/scripts/ask-jev.mjs files --goal "Add support for a new cookie attribute option to setCookie" src ':!*.test.ts' ':!*.test.tsx'
-Scored 189 files in 4 requests, 2.4 s.
-0.94  src/utils/cookie.ts
-0.81  src/helper/cookie/index.ts
-0.62  src/context.ts
-0.37  src/hono-base.ts
+node skills/ask-jev/scripts/ask-jev.mjs ask skills/ask-jev/examples/decision.json
 ```
 
-The script works like this:
+For your own context, write a request with `state` and `questions`, then run:
 
-- In a git repo, directories and globs expand through `git ls-files`, so ignored files stay out and exclude pathspecs such as `':!*.test.ts'` work. Outside a repo, the script walks the directory and skips `.git` and `node_modules`.
-- It skips binary files, lockfiles, and files over 200 KB. It refuses more than 300 candidates and asks you to narrow them.
-- Each file goes to Jev as its path plus the first 2,400 characters, with indentation stripped. Files are packed into requests of about 24,000 estimated tokens of state, below Jev's 32,000-token limit.
-- Requests go out one at a time. On a 429, the script waits for the `retry-after` time (or `x-ratelimit-reset-requests`) and retries. It gives up once the total wait would pass 90 seconds.
-- It prints one summary line, then `score  path` lines for the top `--top` files that score at least `--min`. If no file reaches `--min`, it says so and prints the best 3.
-- Errors go to stderr. The exit code is 2 for bad input or a missing key and 1 for a failed request.
+```sh
+node skills/ask-jev/scripts/ask-jev.mjs ask /tmp/jev-request.json
+node skills/ask-jev/scripts/ask-jev.mjs ask - < /tmp/jev-request.json
+```
 
-## Run the tests
+Read the result's `answers` map by question ID. The runner prints JSON with the provider's probabilities, confidence, and usage metadata. It preserves your context without truncation. Invalid requests exit with code 2. Request or response failures exit with code 1 and write diagnostics to stderr.
+
+Use [the skill workflow](skills/ask-jev/SKILL.md) to frame questions and interpret uncertainty. Use [the request reference](skills/ask-jev/references/request.md) for fields and answer shapes.
+
+## Rank files
+
+The optional `files` helper samples candidates and prints their relevance scores:
+
+```sh
+node skills/ask-jev/scripts/ask-jev.mjs files --goal "Find retry handling" src ':!*.test.*'
+```
+
+See [the file-ranking instructions](skills/ask-jev/references/files.md) for limits and selection options.
+
+## Verify the runner
 
 ```sh
 node --test
 ```
 
-The tests call the script's `main` with a fake `fetch`, so they need no key or network.
+The tests cover mixed Choice, Score, and Noul requests, invalid inputs and responses, provider selection, retries, and file ranking. Subprocess tests exercise the actual CLI through stdin and request files with an offline fetch replacement. These checks verify the integration contract. They do not measure Jev's judgment quality.
 
-## Measure how often agents use the skill
+## Run the file-discovery benchmark
 
-The skill only helps if agents invoke it for the right requests and skip it otherwise. `harness/run.mjs` measures this with Claude Code and Codex.
+`harness/run.mjs` measures agent use of the file-discovery helper with Claude Code and Codex. This benchmark does not measure generic decision quality or trigger rates. Historical results in `harness/results/` cover the original file-only skill.
 
 `harness/tasks.json` pins the fixture, `honojs/hono` at `v4.13.9`, and holds 20 prompts. The 12 prompts with `expectTrigger: true` ask where or how something works across the codebase, and each lists the `answerFiles` a correct answer must name. The 8 prompts with `expectTrigger: false` name the file, paste a snippet, ask about git history, or ask for a command.
 
 For each task, agent, and arm, the harness does the following:
 
 1. Copies the fixture to a fresh directory named `hono-app-<n>`.
-2. In the `skill` arm, installs `SKILL.md` and `scripts/ask-jev.mjs` into `.claude/skills/ask-jev` and `.agents/skills/ask-jev`. The `bare` arm has no skill.
+2. In the `skill` arm, installs the complete `skills/ask-jev` directory into `.claude/skills/ask-jev` and `.agents/skills/ask-jev`. The `bare` arm has no skill.
 3. Runs `claude -p` or `codex exec` with the prompt in that directory, one run at a time.
 4. Records whether the agent ran `ask-jev.mjs`, whether the final answer names every answer file, how many file reads it made, tokens, cost (Claude only), and wall time.
 

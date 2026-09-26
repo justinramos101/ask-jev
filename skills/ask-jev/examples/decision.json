@@ -1,0 +1,35 @@
+{
+	"state": {
+		"goal": "Choose the next investigation for an upload incident.",
+		"observations": [
+			"Uploads fail with HTTP 503 for every account.",
+			"Downloads still succeed.",
+			"Application logs report storage write timeouts.",
+			"Authentication checks succeed."
+		]
+	},
+	"questions": {
+		"next_investigation": {
+			"type": "choice",
+			"instructions": "Which investigation is best supported by the observations?",
+			"criteria": {
+				"storage": "Investigate storage write failures.",
+				"authentication": "Investigate rejected credentials.",
+				"insufficient_evidence": "Gather more evidence before choosing a subsystem."
+			}
+		},
+		"impact": {
+			"type": "score",
+			"instructions": "How much upload and download functionality is unavailable?",
+			"criteria": [
+				"Uploads and downloads both work.",
+				"One operation fails while the other works.",
+				"Uploads and downloads both fail."
+			]
+		},
+		"storage_evidence": {
+			"type": "noul",
+			"instructions": "Do the logs provide evidence of failed storage writes?"
+		}
+	}
+}

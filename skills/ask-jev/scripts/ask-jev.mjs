@@ -26,7 +26,8 @@ const LOCKFILES = new Set([
 const STATE_CONTEXT =
   'A coding assistant is choosing which files to read for the goal below. Each entry in `files` is one candidate: its path and the start of its content, with indentation stripped. Each question asks whether the assistant must read that file to accomplish the goal.';
 
-const USAGE = `Usage: node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] <path|dir|glob>...`;
+const USAGE = `Usage: node ask-jev.mjs ask <request.json|-> [--provider auto|typesafe|vercel]
+       node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] <path|dir|glob>...`;
 
 class InputError extends Error {
   constructor(message, showUsage = false) {
@@ -39,6 +40,16 @@ export async function main(argv, io) {
   const started = io.now();
   try {
     const args = parseCli(argv);
+    if (args.command === 'help') {
+      io.stdout.write(`${USAGE}\n`);
+      return 0;
+    }
+    if (args.command === 'ask') {
+      const request = await readRequest(args.source, io);
+      const result = await ask(request, pickProvider(args.provider, io.env), io);
+      io.stdout.write(`${JSON.stringify(result)}\n`);
+      return 0;
+    }
     const access = pickProvider(args.provider, io.env);
     const { files, skipped } = collectFiles(args.targets, io.cwd);
     const batches = packBatches(files, args.goal);
@@ -79,8 +90,9 @@ function parseCli(argv) {
       allowPositionals: true,
       options: {
         goal: { type: 'string' },
-        top: { type: 'string', default: '8' },
-        min: { type: 'string', default: '0.3' },
+        top: { type: 'string' },
+        min: { type: 'string' },
+        help: { type: 'boolean' },
         provider: { type: 'string', default: 'auto' },
       },
     });
@@ -89,15 +101,106 @@ function parseCli(argv) {
   }
   const [command, ...targets] = parsed.positionals;
   const { goal, provider } = parsed.values;
-  const top = Number(parsed.values.top);
-  const min = Number(parsed.values.min);
+  if (parsed.values.help) return { command: 'help' };
+  if (provider !== 'auto' && !Object.hasOwn(PROVIDERS, provider)) throw new InputError(`unknown provider ${provider}`, true);
+  if (command === 'ask') {
+    for (const flag of ['goal', 'top', 'min']) {
+      if (Object.hasOwn(parsed.values, flag)) throw new InputError(`--${flag} is only supported by files`, true);
+    }
+    if (targets.length !== 1) throw new InputError('ask requires one JSON path or - for stdin', true);
+    return { command, source: targets[0], provider };
+  }
+  const top = Number(parsed.values.top ?? '8');
+  const min = Number(parsed.values.min ?? '0.3');
   if (command !== 'files') throw new InputError(`unknown command ${command ?? '(none)'}`, true);
   if (!goal?.trim()) throw new InputError('--goal is required', true);
   if (targets.length === 0) throw new InputError('pass at least one path, directory or glob', true);
   if (!Number.isInteger(top) || top < 1) throw new InputError('--top must be a positive integer', true);
   if (!(min >= 0 && min <= 1)) throw new InputError('--min must be between 0 and 1', true);
-  if (provider !== 'auto' && !Object.hasOwn(PROVIDERS, provider)) throw new InputError(`unknown provider ${provider}`, true);
-  return { goal: goal.trim(), top, min, provider, targets };
+  return { command, goal: goal.trim(), top, min, provider, targets };
+}
+
+function isObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isContent(value) {
+  return typeof value === 'string' || isObject(value) || Array.isArray(value);
+}
+
+function onlyFields(value, fields, label) {
+  if (!isObject(value)) throw new InputError(`${label} must be an object`);
+  for (const key of Object.keys(value)) {
+    if (!fields.includes(key)) throw new InputError(`${label} has unknown field ${key}`);
+  }
+}
+
+async function readRequest(source, io) {
+  let request;
+  try {
+    const text = io.readInput
+      ? await io.readInput(source)
+      : readFileSync(source === '-' ? 0 : resolve(io.cwd, source), 'utf8');
+    request = JSON.parse(text);
+  } catch (error) {
+    throw new InputError(`cannot read JSON request from ${source}: ${error.message}`);
+  }
+  onlyFields(request, ['state', 'questions'], 'request');
+  if (!isContent(request.state)) throw new InputError('state must be a string, object, or array');
+  if (!isObject(request.questions) || Object.keys(request.questions).length === 0) {
+    throw new InputError('questions must be a nonempty object');
+  }
+  for (const [id, question] of Object.entries(request.questions)) {
+    const label = `question ${JSON.stringify(id)}`;
+    onlyFields(question, ['type', 'instructions', 'criteria'], label);
+    if (!isContent(question.instructions)) throw new InputError(`${label} instructions must be a string, object, or array`);
+    const criteria = question.criteria;
+    if (question.type === 'choice') {
+      if (!isObject(criteria) || Object.keys(criteria).length < 1 || Object.keys(criteria).length > 255 ||
+          !Object.values(criteria).every((value) => value === null || isContent(value))) {
+        throw new InputError(`${label} choice criteria must contain 1..255 options with string, object, array, or null descriptions`);
+      }
+    } else if (question.type === 'score') {
+      if (!Array.isArray(criteria) || criteria.length < 2 || criteria.length > 10 || !criteria.every(isContent)) {
+        throw new InputError(`${label} score criteria must contain 2..10 string, object, or array descriptions`);
+      }
+    } else if (question.type === 'noul') {
+      if (Object.hasOwn(question, 'criteria')) {
+        onlyFields(criteria, ['true', 'false'], `${label} criteria`);
+        if (!Object.values(criteria).every(isContent)) throw new InputError(`${label} noul criteria descriptions must be strings, objects, or arrays`);
+      }
+    } else {
+      throw new InputError(`${label} type must be choice, score, or noul`);
+    }
+  }
+  return request;
+}
+
+function inRange(value, maximum = 1) {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= maximum;
+}
+
+async function ask(request, access, io) {
+  const response = await postWithRetry(access, JSON.stringify({ model: access.model, ...request }), io);
+  if (!isObject(response) || !isObject(response.answers)) throw new Error('Jev returned no answers object');
+  for (const [id, question] of Object.entries(request.questions)) {
+    const answer = Object.hasOwn(response.answers, id) ? response.answers[id] : undefined;
+    const invalid = (field) => new Error(`Jev returned invalid ${field} for question ${JSON.stringify(id)}`);
+    if (!isObject(answer) || answer.type !== question.type) throw invalid('answer type');
+    if (question.type === 'noul') {
+      if (!inRange(answer.noul)) throw invalid('noul');
+      continue;
+    }
+    if (question.type === 'choice' && (typeof answer.choice !== 'string' || !Object.hasOwn(question.criteria, answer.choice))) throw invalid('choice');
+    if (question.type === 'score' && !inRange(answer.score, question.criteria.length - 1)) throw invalid('score');
+    if (!inRange(answer.confidence)) throw invalid('confidence');
+    const keys = Object.keys(question.criteria);
+    if (!isObject(answer.probabilities) || Object.keys(answer.probabilities).length !== keys.length ||
+        !keys.every((key) => Object.hasOwn(answer.probabilities, key) && inRange(answer.probabilities[key]))) {
+      throw invalid('probabilities');
+    }
+  }
+  return response;
 }
 
 function pickProvider(choice, env) {
@@ -266,14 +369,8 @@ async function askBatch(entries, goal, access, io) {
       },
     ]),
   );
-  const body = JSON.stringify({ model: access.model, state: stateFor(entries, goal), questions });
-  const response = await postWithRetry(access, body, io);
-  const answers = response.answers ?? {};
-  return entries.map((entry) => {
-    const score = answers[entry.id]?.noul;
-    if (typeof score !== 'number' || !Number.isFinite(score)) throw new Error(`Jev returned no score for ${entry.path}`);
-    return { path: entry.path, score };
-  });
+  const response = await ask({ state: stateFor(entries, goal), questions }, access, io);
+  return entries.map((entry) => ({ path: entry.path, score: response.answers[entry.id].noul }));
 }
 
 async function postWithRetry(access, body, io) {
