@@ -1,6 +1,6 @@
 # Request and answer reference
 
-`ask <request.json|->` accepts a JSON object with exactly two required fields. `state` holds the context. `questions` maps IDs to typed questions. The script selects the provider model and sends one request, apart from retries.
+`ask <request.json|->` accepts a JSON object with two fields, both required. `state` holds the context. `questions` maps IDs to typed questions. The script selects the provider model and sends one request, apart from retries.
 
 ```json
 {
@@ -14,7 +14,7 @@
 }
 ```
 
-The `questions` map must contain at least one question. Each question accepts only `type`, `instructions`, and `criteria`. Unknown request and question fields are input errors.
+The `questions` map must contain at least one question. Each question requires `type` and `instructions`. The `criteria` field is required for `choice` and `score`, and optional for `noul`. Unknown request and question fields are input errors.
 
 `state` and `instructions` accept a string, object, or array. Structured instructions can hold the question and candidate-specific details. Generic requests preserve the supplied context without file sampling or truncation.
 
@@ -73,7 +73,20 @@ The answer contains `type` and `noul`. The `noul` number is the probability of y
 
 ## Output and errors
 
-Success writes the provider response as JSON, including its answers, model, and usage metadata. The script checks answer types and numeric ranges before printing the response. For `choice` and `score`, it also checks the probability keys. It does not check probability sums or validate `legend` or usage metadata. It does not choose thresholds or execute actions.
+Success writes the provider response as one JSON line. The `answers` map uses the request's question IDs. This formatted example shows the answer structure for the first request on this page. The probability is illustrative.
+
+```json
+{
+	"answers": {
+		"partial_outage": {
+			"type": "noul",
+			"noul": 0.95
+		}
+	}
+}
+```
+
+The runner preserves any additional response fields, including model and usage metadata. The script checks answer types and numeric ranges before printing the response. For `choice` and `score`, it also checks the probability keys. It does not check probability sums, recompute scores, or validate `legend` or usage metadata. It does not choose thresholds or execute actions.
 
 A failed request produces no answer JSON. Diagnostics, exit codes, and retry behavior are described in the [CLI reference](cli.md).
 

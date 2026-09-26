@@ -1,6 +1,6 @@
 # ask-jev
 
-Consult Jev from your agent to choose among approaches, score candidates, check claims against evidence, or rank files to read. You supply the context and questions. Jev returns structured answers with probabilities.
+Use `ask-jev` to consult Jev from your agent. Ask it to choose an approach, score candidates, check a claim against evidence, or rank files to read. You supply the context and questions. Jev returns structured answers with probabilities.
 
 Jev does not inspect your workspace, generate explanations, or execute actions. The [skill workflow](skills/ask-jev/SKILL.md) tells the agent how to frame questions and use the answers.
 
@@ -62,7 +62,7 @@ To call the runner directly, run the bundled example from the repository root:
 node skills/ask-jev/scripts/ask-jev.mjs ask skills/ask-jev/examples/decision.json
 ```
 
-Read the JSON `answers` map by question ID. The example asks which subsystem to investigate, how much functionality is unavailable, and whether the logs support a storage failure.
+Read the JSON `answers` map by question ID. The example returns `next_investigation` as a `choice`, `impact` as a `score`, and `storage_evidence` as a `noul` probability.
 
 For your own decision, adapt [the example request](skills/ask-jev/examples/decision.json) using the [request and answer reference](skills/ask-jev/references/request.md). Then pass your request file:
 
@@ -74,42 +74,9 @@ node skills/ask-jev/scripts/ask-jev.mjs ask /tmp/jev-request.json
 
 From the project you want to search, follow [Rank files to read](skills/ask-jev/references/files.md). Use the `files` command to score candidate excerpts before you read the full files.
 
-## Check changes
-
-From the repository root, run the offline tests:
-
-```sh
-node --test
-```
-
-To compare agent runs with and without the skill, follow [Run the file-discovery benchmark](harness/README.md). The benchmark requires API access and authenticated agent CLIs.
-
 ## Scan for secrets
 
-Install [Gitleaks](https://github.com/gitleaks/gitleaks#installing). On macOS with Homebrew, run:
-
-```sh
-brew install gitleaks
-```
-
-Enable the pre-commit hook once per clone:
-
-```sh
-git config --local core.hooksPath .githooks
-```
-
-The hook scans staged changes before each commit. It blocks the commit if Gitleaks detects a secret, fails, or is not installed.
-
-From the repository root, scan Git history and the working tree:
-
-```sh
-gitleaks git --redact --no-banner --log-opts=--all .
-gitleaks dir --redact --no-banner .
-```
-
-Both commands exit with code 1 if they detect secrets. The working-tree scan includes uncommitted files.
-
-The [Gitleaks workflow](.github/workflows/gitleaks.yml) scans Git history on pushes and pull requests. It uses Gitleaks 8.30.1 with the default rules and redacts secrets from its output.
+Follow [Prepare your checkout](CONTRIBUTING.md#prepare-your-checkout) to install Gitleaks and enable the pre-commit hook. Follow [Check your change](CONTRIBUTING.md#check-your-change) to scan Git history and uncommitted files.
 
 ## Contribute
 
