@@ -1,0 +1,157 @@
+{
+  "fixture": {
+    "repo": "https://github.com/honojs/hono",
+    "tag": "v4.13.9",
+    "commit": "7c3b0df96dbf3e767968ff5afe4c0d999257b8ee",
+    "install": [
+      "bun",
+      "install",
+      "--frozen-lockfile"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "router-choice",
+      "prompt": "where does hono decide which router to use? I'm trying to figure out what happens when one of my route patterns isn't supported by the default router",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/hono.ts",
+        "src/router/smart-router/router.ts"
+      ]
+    },
+    {
+      "id": "cookie-option",
+      "prompt": "which files would I change to add a new cookie option to setCookie?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/utils/cookie.ts"
+      ]
+    },
+    {
+      "id": "error-path",
+      "prompt": "when a middleware throws, how does the error end up in app.onError? walk me through the code path",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/compose.ts",
+        "src/hono-base.ts"
+      ]
+    },
+    {
+      "id": "body-reread",
+      "prompt": "why can I call c.req.json() after an earlier middleware already called c.req.text()? where does hono handle that?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/request.ts"
+      ]
+    },
+    {
+      "id": "jwt-verify",
+      "prompt": "which signing algorithms does the jwt middleware accept, and where is the signature actually checked?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/utils/jwt/jwa.ts",
+        "src/utils/jwt/jws.ts"
+      ]
+    },
+    {
+      "id": "sse-batching",
+      "prompt": "my streamSSE events seem to arrive in batches instead of one at a time. how does hono write SSE events to the response?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/helper/streaming/sse.ts",
+        "src/utils/stream.ts"
+      ]
+    },
+    {
+      "id": "rpc-url",
+      "prompt": "in the hc client, how is the request URL built from the route and the path params?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/client/client.ts",
+        "src/client/utils.ts"
+      ]
+    },
+    {
+      "id": "route-mount",
+      "prompt": "how does app.route('/api', sub) merge the sub app's routes and middleware into the parent app?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/hono-base.ts"
+      ]
+    },
+    {
+      "id": "validator-json",
+      "prompt": "what does the json validator do when the request doesn't have a JSON content-type, and where is that decided?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/validator/validator.ts"
+      ]
+    },
+    {
+      "id": "bun-static",
+      "prompt": "how does serveStatic on Bun find the file on disk, and where does it block path traversal?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/adapter/bun/serve-static.ts",
+        "src/middleware/serve-static/index.ts"
+      ]
+    },
+    {
+      "id": "header-merge",
+      "prompt": "if I set a header with c.header() in a middleware and then return c.json() from the handler, how do those headers end up on the response?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/context.ts"
+      ]
+    },
+    {
+      "id": "param-decode",
+      "prompt": "a path param containing %2F comes out decoded in c.req.param(). where does that decoding happen?",
+      "expectTrigger": true,
+      "answerFiles": [
+        "src/request.ts",
+        "src/utils/url.ts"
+      ]
+    },
+    {
+      "id": "edit-powered-by",
+      "prompt": "change the default X-Powered-By value in src/middleware/powered-by/index.ts from 'Hono' to 'Hono Server' and update the @default in the doc comment to match",
+      "expectTrigger": false
+    },
+    {
+      "id": "run-url-tests",
+      "prompt": "run the tests in src/utils/url.test.ts and tell me whether they pass",
+      "expectTrigger": false
+    },
+    {
+      "id": "explain-strict",
+      "prompt": "what does this line do?\n\nthis.getPath = (strict ?? true) ? (options.getPath ?? getPath) : getPathNoStrict",
+      "expectTrigger": false
+    },
+    {
+      "id": "cors-history",
+      "prompt": "who last changed the cors middleware and what did that commit change?",
+      "expectTrigger": false
+    },
+    {
+      "id": "explain-regex",
+      "prompt": "what does this regex match?\n\n/(?:^|[\\/\\\\])\\.{1,2}(?:$|[\\/\\\\])|[\\/\\\\]{2,}|\\\\/",
+      "expectTrigger": false
+    },
+    {
+      "id": "compose-next-twice",
+      "prompt": "in src/compose.ts, what happens if a middleware calls next() twice?",
+      "expectTrigger": false
+    },
+    {
+      "id": "recent-commits",
+      "prompt": "summarize what changed in the last 3 commits",
+      "expectTrigger": false
+    },
+    {
+      "id": "list-middleware",
+      "prompt": "list the middleware directories under src/middleware",
+      "expectTrigger": false
+    }
+  ]
+}
