@@ -166,16 +166,17 @@ test('skips binary files, lockfiles and files over 200 KB', async () => {
   assert.deepEqual(result.requests[0].body.state.files.map((file) => file.path), ['app/main.ts']);
 });
 
-test('inside a git repo, directories expand to tracked and unignored files only', async () => {
+test('inside a git repo, targets expand to unignored files and honor exclude pathspecs', async () => {
   const cwd = project({
     '.gitignore': 'dist/\nnode_modules/\n',
     'src/index.ts': 'export {}',
+    'src/index.test.ts': 'test',
     'dist/index.js': 'built',
     'node_modules/dep/index.js': 'dep',
   });
   execFileSync('git', ['init', '-q'], { cwd });
 
-  const result = await run(['files', '--goal', 'x', '.'], { cwd });
+  const result = await run(['files', '--goal', 'x', '.', ':!*.test.ts'], { cwd });
 
   assert.deepEqual(result.requests[0].body.state.files.map((file) => file.path), ['.gitignore', 'src/index.ts']);
 });

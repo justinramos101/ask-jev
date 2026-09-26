@@ -28,14 +28,19 @@ const STATE_CONTEXT =
 
 const USAGE = `Usage: node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] <path|dir|glob>...`;
 
-class UsageError extends Error {}
+class InputError extends Error {
+  constructor(message, showUsage = false) {
+    super(message);
+    this.showUsage = showUsage;
+  }
+}
 
 export async function main(argv, io) {
   const started = io.now();
   try {
     const args = parseCli(argv);
     const access = pickProvider(args.provider, io.env);
-    const { files, skipped } = collectFiles(args.targets, io.cwd, io.stderr);
+    const { files, skipped } = collectFiles(args.targets, io.cwd);
     const batches = packBatches(files, args.goal);
     const scores = [];
     for (const batch of batches) scores.push(...(await askBatch(batch, args.goal, access, io)));
@@ -53,8 +58,8 @@ export async function main(argv, io) {
     return 0;
   } catch (error) {
     io.stderr.write(`ask-jev: ${error.message}\n`);
-    if (error instanceof UsageError) io.stderr.write(`${USAGE}\n`);
-    return error instanceof UsageError ? 2 : 1;
+    if (error.showUsage) io.stderr.write(`${USAGE}\n`);
+    return error instanceof InputError ? 2 : 1;
   }
 }
 
@@ -80,18 +85,18 @@ function parseCli(argv) {
       },
     });
   } catch (error) {
-    throw new UsageError(error.message);
+    throw new InputError(error.message, true);
   }
   const [command, ...targets] = parsed.positionals;
   const { goal, provider } = parsed.values;
   const top = Number(parsed.values.top);
   const min = Number(parsed.values.min);
-  if (command !== 'files') throw new UsageError(`unknown command ${command ?? '(none)'}`);
-  if (!goal?.trim()) throw new UsageError('--goal is required');
-  if (targets.length === 0) throw new UsageError('pass at least one path, directory or glob');
-  if (!Number.isInteger(top) || top < 1) throw new UsageError('--top must be a positive integer');
-  if (!(min >= 0 && min <= 1)) throw new UsageError('--min must be between 0 and 1');
-  if (provider !== 'auto' && !Object.hasOwn(PROVIDERS, provider)) throw new UsageError(`unknown provider ${provider}`);
+  if (command !== 'files') throw new InputError(`unknown command ${command ?? '(none)'}`, true);
+  if (!goal?.trim()) throw new InputError('--goal is required', true);
+  if (targets.length === 0) throw new InputError('pass at least one path, directory or glob', true);
+  if (!Number.isInteger(top) || top < 1) throw new InputError('--top must be a positive integer', true);
+  if (!(min >= 0 && min <= 1)) throw new InputError('--min must be between 0 and 1', true);
+  if (provider !== 'auto' && !Object.hasOwn(PROVIDERS, provider)) throw new InputError(`unknown provider ${provider}`, true);
   return { goal: goal.trim(), top, min, provider, targets };
 }
 
@@ -101,17 +106,11 @@ function pickProvider(choice, env) {
     const apiKey = env[PROVIDERS[name].keyEnv];
     if (apiKey) return { ...PROVIDERS[name], apiKey };
   }
-  throw new UsageError(`set ${order.map((name) => PROVIDERS[name].keyEnv).join(' or ')}`);
+  throw new InputError(`set ${order.map((name) => PROVIDERS[name].keyEnv).join(' or ')}`);
 }
 
-function collectFiles(targets, cwd, stderr) {
-  const inRepo = isGitWorkTree(cwd);
-  const paths = new Set();
-  for (const target of targets) {
-    const found = expandTarget(target, cwd, inRepo);
-    if (found.length === 0) stderr.write(`ask-jev: nothing matches ${target}\n`);
-    for (const path of found) paths.add(path);
-  }
+function collectFiles(targets, cwd) {
+  const paths = new Set(expandTargets(targets, cwd));
   const sized = [];
   let skipped = 0;
   for (const path of paths) {
@@ -121,7 +120,7 @@ function collectFiles(targets, cwd, stderr) {
     else sized.push(path);
   }
   if (sized.length > MAX_CANDIDATES) {
-    throw new UsageError(
+    throw new InputError(
       `${sized.length} candidate files; ask-jev scores at most ${MAX_CANDIDATES}. Narrow the paths: a subdirectory, a glob such as 'src/**/*.ts', or the files from rg -l <term>.`,
     );
   }
@@ -131,7 +130,7 @@ function collectFiles(targets, cwd, stderr) {
     if (text === undefined) skipped++;
     else files.push({ path, ...excerptOf(text) });
   }
-  if (files.length === 0) throw new UsageError('no readable text files among the candidates');
+  if (files.length === 0) throw new InputError('no readable text files among the candidates');
   return { files, skipped };
 }
 
@@ -147,17 +146,27 @@ function git(cwd, args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 });
 }
 
-function expandTarget(target, cwd, inRepo) {
-  const absolute = resolve(cwd, target);
-  const stats = existsSync(absolute) ? statSync(absolute) : undefined;
-  if (stats?.isFile()) return [relative(cwd, absolute)];
-  if (inRepo) {
-    return git(cwd, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', target])
-      .split('\0')
-      .filter(Boolean);
+// Everything that is not an existing file goes to one git ls-files call, so
+// exclude pathspecs such as ':!*.test.ts' apply to the other targets.
+function expandTargets(targets, cwd) {
+  const files = [];
+  const rest = [];
+  for (const target of targets) {
+    const absolute = resolve(cwd, target);
+    if (existsSync(absolute) && statSync(absolute).isFile()) files.push(relative(cwd, absolute));
+    else rest.push(target);
   }
-  if (stats?.isDirectory()) return walk(absolute).map((path) => relative(cwd, path));
-  return globWalk(target, cwd);
+  if (rest.length === 0) return files;
+  if (isGitWorkTree(cwd)) {
+    const listed = git(cwd, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', ...rest]);
+    return [...files, ...listed.split('\0').filter(Boolean)];
+  }
+  for (const target of rest) {
+    const absolute = resolve(cwd, target);
+    if (existsSync(absolute)) files.push(...walk(absolute).map((path) => relative(cwd, path)));
+    else files.push(...globWalk(target, cwd));
+  }
+  return files;
 }
 
 function walk(dir) {
