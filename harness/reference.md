@@ -34,7 +34,7 @@ The benchmark requires `AI_GATEWAY_API_KEY`. Agents inherit the environment exce
 
 On the first run, the benchmark clones the fixture into `<root>/cache/hono`. When `node_modules` is absent, it runs the installation command from `tasks.json`.
 
-Each task, agent, and comparison group gets a fresh copy named `hono-app-<n>`. The `skill` group installs the complete skill in both `.claude/skills/ask-jev` and `.agents/skills/ask-jev`. The `bare` group gets no project-local skill. The benchmark does not remove globally installed skills or agent configuration.
+Each task, agent, and comparison group gets a fresh copy at `<root>/work/hono-app-<n>`. The `skill` group installs the complete skill in both `.claude/skills/ask-jev` and `.agents/skills/ask-jev`. The `bare` group gets no project-local skill. The benchmark does not remove globally installed skills or agent configuration.
 
 Runs execute one at a time through `claude -p` or `codex exec`. Working copies are deleted after each run unless `--keep` is set.
 
@@ -48,8 +48,8 @@ The report includes these measurements:
 | False-trigger rate | Share of other runs with a captured command containing `ask-jev.mjs` |
 | Answer accuracy | Share of expected-trigger runs whose final answer names every expected file |
 | File reads | Claude `Read` tool calls plus recognized shell read commands, or recognized shell read commands for Codex |
-| Tokens | Input, cached input, and output usage reported by the agent |
-| Cost | Cost reported by Claude Code. Unavailable for Codex |
+| Tokens | Input, cached input, and output usage reported by the agent. Input includes cached input |
+| Cost | Cost reported by Claude Code. Excludes separate Jev calls. Unavailable for Codex |
 | Wall time | Elapsed time for the agent process |
 
 A file matches by basename. If that basename occurs more than once in the fixture's tracked files, the check uses the last two path segments instead. Matching uses substrings, not citations or a review of the answer.

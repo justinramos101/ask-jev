@@ -37,7 +37,7 @@ The runner defines these providers:
 | `typesafe` | `TYPESAFE_API_KEY` | `https://api.typesafe.ai/v1/systemone` | `jev-latest` |
 | `vercel` | `AI_GATEWAY_API_KEY` | `https://ai-gateway.vercel.sh/typesafe/v1/systemone` | `typesafe-ai/jev` |
 
-`auto` selects TypeSafe when its key is set, then Vercel. An explicit provider requires that provider's key. A failed request does not cause a switch to the other provider.
+`auto` selects TypeSafe when `TYPESAFE_API_KEY` is nonempty. Otherwise, it selects Vercel when `AI_GATEWAY_API_KEY` is nonempty. An explicit provider requires that provider's key. A failed request does not cause a switch to the other provider.
 
 The runner sends the request context and questions to the selected endpoint with the API key in an authorization header. Keys come from the environment, not the request JSON.
 
@@ -57,4 +57,4 @@ The process returns these exit codes:
 
 The runner retries HTTP 429 responses with a cumulative wait limit of 90 seconds per request. It uses numeric `retry-after` seconds first, then a duration from `x-ratelimit-reset-requests`. Without either value, it waits 30 seconds.
 
-If the next wait would exceed the limit, the runner exits with code 1. Other HTTP errors, network failures, and malformed responses are not retried. The runner sets no request timeout.
+If the next wait would exceed the limit, the runner exits with code 1. The runner does not retry other HTTP errors, network failures, or malformed responses. The runner sets no request timeout.

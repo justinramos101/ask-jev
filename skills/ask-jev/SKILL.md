@@ -5,7 +5,7 @@ description: Use Jev for bounded judgments over supplied context. Use when choos
 
 # Ask Jev
 
-Use this skill to consult Jev during your own work. Jev evaluates context and returns structured judgments. You supply the evidence, alternatives, and criteria. You interpret the answers and choose the next step.
+Use this skill when a decision requires judgment about supplied evidence. For a fact you can verify with a command or lookup, check it directly. You supply the evidence, alternatives, and criteria. You interpret the answers and choose the next step.
 
 ## Frame the judgment
 
@@ -22,9 +22,9 @@ Keep factual observations in `state` and judgment instructions in `questions`. N
 
 Send only context you are allowed to share with the selected provider. Requests leave your machine without secret redaction. For file ranking, check that candidate paths and excerpts contain no credentials or private material you cannot share.
 
-Use Node.js 18 or later. Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment before you call the script. If both exist, the TypeSafe key takes precedence. To select one explicitly, pass `--provider typesafe` or `--provider vercel`.
+Use Node.js 18 or later. Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment before you call the script. If both exist, the TypeSafe key takes precedence. To select a provider explicitly, pass `--provider typesafe` or `--provider vercel`.
 
-Write a JSON file with `state` and a nonempty `questions` map. Use a string, object, or array for `state`. Read [the request reference](references/request.md) for all three question types, or adapt [the mixed decision example](examples/decision.json).
+Write a JSON file with `state` and a nonempty `questions` map. Put the question text in `instructions` and the options or rubric in `criteria`. Use a string, object, or array for `state`. Read [the request reference](references/request.md) for all three question types, or adapt [the mixed decision example](examples/decision.json).
 
 Replace `<skill-directory>` with the absolute path to the installed skill. Run:
 
