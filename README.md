@@ -1,91 +1,120 @@
 # ask-jev
 
-An agent skill for consulting Jev during a task. Give Jev the context and bounded questions. Use its structured answers to choose among approaches, route requests, rate candidates, check claims against evidence, or rank relevant material.
+Consult Jev from your agent to choose among approaches, score candidates, check claims against evidence, or rank files to read. You supply the context and questions. Jev returns structured answers with probabilities.
 
-Jev supports three question types. `choice` selects an explicit option. `score` rates context against ordered descriptions. `noul` returns the probability that a proposition is true. All three can share one request. See the [TypeSafe documentation](https://docs.typesafe.ai/introduction).
+Jev does not inspect your workspace, generate explanations, or execute actions. The [skill workflow](skills/ask-jev/SKILL.md) tells the agent how to frame questions and use the answers.
 
-The agent supplies evidence and interprets the results. Jev does not generate explanations, inspect a workspace, or execute a selected action.
+## Install the skill
 
-## Install
+Use Node.js 18 or later. The runner has no package dependencies.
 
-Copy or symlink the complete `skills/ask-jev` directory into the skills directory of each agent you use:
+### Install with the Skills CLI
+
+From your project directory, run:
 
 ```sh
+npx skills add justinramos101/ask-jev --skill ask-jev
+```
+
+Follow the prompts to select your agent. To install across projects, add `-g`. To select an agent in the command, add `-a claude-code` or `-a codex`.
+
+See the [Skills CLI documentation](https://github.com/vercel-labs/skills#readme) for more options. After installation, [set an API key](#set-an-api-key).
+
+### Install manually
+
+From the repository root, copy or symlink the complete `skills/ask-jev` directory into your agent's skills directory.
+
+For Claude Code, run:
+
+```sh
+mkdir -p ~/.claude/skills
 ln -s "$PWD/skills/ask-jev" ~/.claude/skills/ask-jev
+```
+
+For agents that read `~/.agents/skills`, run:
+
+```sh
+mkdir -p ~/.agents/skills
 ln -s "$PWD/skills/ask-jev" ~/.agents/skills/ask-jev
 ```
 
-For one project, use `<project>/.claude/skills/ask-jev` or `<project>/.agents/skills/ask-jev` instead.
+To install for one project, use that project's `.claude/skills` or `.agents/skills` directory instead. Keep the repository in place if you use a symlink.
 
-The runner requires Node 18 or later and has no package dependencies.
+## Set an API key
 
-## Set a key
+Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment that starts your agent. Keep the key out of request files.
 
-Set one of these environment variables:
+When both keys exist, the runner uses `TYPESAFE_API_KEY`. To select a provider explicitly, pass `--provider typesafe` or `--provider vercel`.
 
-- `TYPESAFE_API_KEY` sends requests to `https://api.typesafe.ai/v1/systemone` with model `jev-latest`.
-- `AI_GATEWAY_API_KEY` sends requests through the Vercel AI Gateway with model `typesafe-ai/jev`.
-
-When both exist, the runner uses the TypeSafe key. Pass `--provider typesafe` or `--provider vercel` to select one explicitly. Keep keys in the environment, outside request JSON.
+See the [CLI reference](skills/ask-jev/references/cli.md) for provider endpoints, models, and exit codes.
 
 ## Ask for a decision
 
-Adapt [the mixed decision example](skills/ask-jev/examples/decision.json). It asks which subsystem to investigate, how much functionality is unavailable, and whether the logs support a storage failure.
+Send only context you are allowed to share with the selected provider. Requests leave your machine, and the runner does not redact secrets. The `files` command sends file paths and excerpts.
+
+Ask your agent to consult Jev with a goal and evidence. For example:
+
+> Ask Jev which subsystem to investigate. Uploads fail with HTTP 503, downloads work, storage writes time out, and authentication checks succeed.
+
+To call the runner directly, run the bundled example from the repository root:
 
 ```sh
 node skills/ask-jev/scripts/ask-jev.mjs ask skills/ask-jev/examples/decision.json
 ```
 
-For your own context, write a request with `state` and `questions`, then run:
+Read the JSON `answers` map by question ID. The example asks which subsystem to investigate, how much functionality is unavailable, and whether the logs support a storage failure.
+
+For your own decision, adapt [the example request](skills/ask-jev/examples/decision.json) using the [request and answer reference](skills/ask-jev/references/request.md). Then pass your request file:
 
 ```sh
 node skills/ask-jev/scripts/ask-jev.mjs ask /tmp/jev-request.json
-node skills/ask-jev/scripts/ask-jev.mjs ask - < /tmp/jev-request.json
 ```
 
-Read the result's `answers` map by question ID. The runner prints JSON with the provider's probabilities, confidence, and usage metadata. It preserves your context without truncation. Invalid requests exit with code 2. Request or response failures exit with code 1 and write diagnostics to stderr.
+## Rank files to read
 
-Use [the skill workflow](skills/ask-jev/SKILL.md) to frame questions and interpret uncertainty. Use [the request reference](skills/ask-jev/references/request.md) for fields and answer shapes.
+From the project you want to search, follow [Rank files to read](skills/ask-jev/references/files.md). Use the `files` command to score candidate excerpts before you read the full files.
 
-## Rank files
+## Check changes
 
-The optional `files` helper samples candidates and prints their relevance scores:
-
-```sh
-node skills/ask-jev/scripts/ask-jev.mjs files --goal "Find retry handling" src ':!*.test.*'
-```
-
-See [the file-ranking instructions](skills/ask-jev/references/files.md) for limits and selection options.
-
-## Verify the runner
+From the repository root, run the offline tests:
 
 ```sh
 node --test
 ```
 
-The tests cover mixed Choice, Score, and Noul requests, invalid inputs and responses, provider selection, retries, and file ranking. Subprocess tests exercise the actual CLI through stdin and request files with an offline fetch replacement. These checks verify the integration contract. They do not measure Jev's judgment quality.
+To compare agent runs with and without the skill, follow [Run the file-discovery benchmark](harness/README.md). The benchmark requires API access and authenticated agent CLIs.
 
-## Run the file-discovery benchmark
+## Scan for secrets
 
-`harness/run.mjs` measures agent use of the file-discovery helper with Claude Code and Codex. This benchmark does not measure generic decision quality or trigger rates. Historical results in `harness/results/` cover the original file-only skill.
-
-`harness/tasks.json` pins the fixture, `honojs/hono` at `v4.13.9`, and holds 20 prompts. The 12 prompts with `expectTrigger: true` ask where or how something works across the codebase, and each lists the `answerFiles` a correct answer must name. The 8 prompts with `expectTrigger: false` name the file, paste a snippet, ask about git history, or ask for a command.
-
-For each task, agent, and arm, the harness does the following:
-
-1. Copies the fixture to a fresh directory named `hono-app-<n>`.
-2. In the `skill` arm, installs the complete `skills/ask-jev` directory into `.claude/skills/ask-jev` and `.agents/skills/ask-jev`. The `bare` arm has no skill.
-3. Runs `claude -p` or `codex exec` with the prompt in that directory, one run at a time.
-4. Records whether the agent ran `ask-jev.mjs`, whether the final answer names every answer file, how many file reads it made, tokens, cost (Claude only), and wall time.
+Install [Gitleaks](https://github.com/gitleaks/gitleaks#installing). On macOS with Homebrew, run:
 
 ```sh
-AI_GATEWAY_API_KEY=... node harness/run.mjs [--agents claude,codex] [--arms skill,bare] [--tasks id,id] [--limit n] [--root dir] [--timeout-min 15] [--keep]
+brew install gitleaks
 ```
 
-- `--root` holds the fixture cache, the copies, and the raw event streams. It defaults to `<tmpdir>/hono-dev`. Keep it outside this repo so the agents never see the harness.
-- The first run clones the fixture and runs `bun install` in the cache.
-- `--keep` leaves each copy on disk after its run.
+Enable the pre-commit hook once per clone:
 
-The harness prints a summary table and writes it to `harness/results/<timestamp>.md`. Raw streams and `runs.json` go to `<root>/streams/<timestamp>/`, with the key redacted.
+```sh
+git config --local core.hooksPath .githooks
+```
 
-The answer check matches a file by its basename, or by its last two path segments when the basename is not unique in the fixture (`client/utils.ts`).
+The hook scans staged changes before each commit. It blocks the commit if Gitleaks detects a secret, fails, or is not installed.
+
+From the repository root, scan Git history and the working tree:
+
+```sh
+gitleaks git --redact --no-banner --log-opts=--all .
+gitleaks dir --redact --no-banner .
+```
+
+Both commands exit with code 1 if they detect secrets. The working-tree scan includes uncommitted files.
+
+The [Gitleaks workflow](.github/workflows/gitleaks.yml) scans Git history on pushes and pull requests. It uses Gitleaks 8.30.1 with the default rules and redacts secrets from its output.
+
+## Contribute
+
+Follow the [contribution guide](CONTRIBUTING.md) to test changes and open a pull request. Report vulnerabilities through the [security policy](SECURITY.md).
+
+## License
+
+[MIT](LICENSE). Copyright (c) 2026 Justin Ramos.

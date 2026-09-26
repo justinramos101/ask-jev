@@ -1,6 +1,6 @@
 # Request and answer reference
 
-`ask <request.json|->` accepts a JSON object with two fields. `state` holds the context. `questions` maps IDs to typed questions. The script selects the provider model and sends one request, apart from retries.
+`ask <request.json|->` accepts a JSON object with exactly two required fields. `state` holds the context. `questions` maps IDs to typed questions. The script selects the provider model and sends one request, apart from retries.
 
 ```json
 {
@@ -14,11 +14,13 @@
 }
 ```
 
+The `questions` map must contain at least one question. Each question accepts only `type`, `instructions`, and `criteria`. Unknown request and question fields are input errors.
+
 `state` and `instructions` accept a string, object, or array. Structured instructions can hold the question and candidate-specific details. Generic requests preserve the supplied context without file sampling or truncation.
 
 ## Choice
 
-`criteria` is a map of up to 255 option names to descriptions. Descriptions accept a string, object, array, or `null` when the option name is sufficient.
+`criteria` is a map of 1 to 255 option names to descriptions. Descriptions accept a string, object, array, or `null` when the option name is sufficient.
 
 ```json
 {
@@ -54,7 +56,7 @@ The answer contains `type`, `score`, `probabilities`, `confidence`, and `legend`
 
 ## Noul
 
-`instructions` states one yes/no question or proposition. Optional `criteria` describes the `true` and `false` outcomes.
+`instructions` states one question or proposition with a yes or no answer. Optional `criteria` accepts `true` and `false` fields. Either field can be omitted. Each description accepts a string, object, or array. No other criteria fields are accepted.
 
 ```json
 {
@@ -71,8 +73,8 @@ The answer contains `type` and `noul`. The `noul` number is the probability of y
 
 ## Output and errors
 
-Success writes the provider response as JSON, including its answers, model, and usage metadata. The script validates the requested answers before printing them. It does not choose thresholds or execute actions.
+Success writes the provider response as JSON, including its answers, model, and usage metadata. The script checks answer types and numeric ranges before printing the response. For `choice` and `score`, it also checks the probability keys. It does not check probability sums or validate `legend` or usage metadata. It does not choose thresholds or execute actions.
 
-Diagnostics go to stderr. Invalid input or missing credentials exits with code 2. Request or response failures exit with code 1. A failed request produces no answer JSON.
+A failed request produces no answer JSON. Diagnostics, exit codes, and retry behavior are described in the [CLI reference](cli.md).
 
 Question types follow the [TypeSafe API reference](https://docs.typesafe.ai/api). The [Choice](https://docs.typesafe.ai/primitives/choice), [Score](https://docs.typesafe.ai/primitives/score), and [Noul](https://docs.typesafe.ai/primitives/noul) guides describe how to frame and interpret each judgment.

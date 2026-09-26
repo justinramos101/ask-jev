@@ -13,16 +13,20 @@ Use this skill to consult Jev during your own work. Jev evaluates context and re
 2. Choose a question type.
    - Use `choice` to select one option, such as a next investigation, implementation approach, request category, or tool. Include an `other` or `insufficient_evidence` option when the alternatives might not cover the case.
    - Use `score` to rate a candidate on an ordered rubric, such as completeness, relevance, or severity. Describe each level concretely. For ranking, ask one question per candidate with the same rubric.
-   - Use `noul` to judge a yes/no proposition, such as whether a passage supports a claim or a proposed change satisfies a requirement.
+   - Use `noul` to judge a proposition with a yes or no answer, such as whether a passage supports a claim or a proposed change satisfies a requirement.
 3. Ask one focused question per judgment. Split a complex decision into factors, then combine the answers using the task's priorities. Put independent questions about the same context in one request. Questions cannot see each other's answers.
 
-Keep factual observations in `state` and judgment instructions in `questions`. Name the target explicitly in each question. Question IDs identify results but are not shown to the model. Use your own reasoning to generate alternatives or explain tradeoffs. Jev does not generate prose or code.
+Keep factual observations in `state` and judgment instructions in `questions`. Name the target explicitly in each question. Question IDs identify results but are not shown to the model. Use your own reasoning to generate alternatives or explain trade-offs. Jev does not generate prose or code.
 
 ## Call Jev
 
+Send only context you are allowed to share with the selected provider. Requests leave your machine without secret redaction. For file ranking, check that candidate paths and excerpts contain no credentials or private material you cannot share.
+
+Use Node.js 18 or later. Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment before you call the script. If both exist, the TypeSafe key takes precedence. To select one explicitly, pass `--provider typesafe` or `--provider vercel`.
+
 Write a JSON file with `state` and a nonempty `questions` map. Use a string, object, or array for `state`. Read [the request reference](references/request.md) for all three question types, or adapt [the mixed decision example](examples/decision.json).
 
-Run the script from this skill's directory by its absolute path:
+Replace `<skill-directory>` with the absolute path to the installed skill. Run:
 
 ```sh
 node <skill-directory>/scripts/ask-jev.mjs ask /tmp/jev-request.json
@@ -33,8 +37,6 @@ To send JSON through stdin:
 ```sh
 node <skill-directory>/scripts/ask-jev.mjs ask - < /tmp/jev-request.json
 ```
-
-Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment. If both exist, the TypeSafe key takes precedence. Use `--provider typesafe` or `--provider vercel` to select one explicitly. The script needs Node 18 or later.
 
 ## Use the answers
 
@@ -50,4 +52,4 @@ Keep action execution in the calling agent. A selected option does not grant per
 
 ## Rank candidate files
 
-For file discovery, use the optional `files` helper. It samples file contents and prints relevance scores. Read [the file-ranking instructions](references/files.md) before using it. File ranking is one use case; general decisions use `ask`.
+For file discovery, use the optional `files` helper. It samples file contents and prints relevance scores. Read [the file-ranking instructions](references/files.md) before using it. For general decisions, use `ask`.
