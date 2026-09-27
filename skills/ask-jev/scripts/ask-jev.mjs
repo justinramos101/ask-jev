@@ -7,7 +7,10 @@ import { parseArgs } from 'node:util';
 
 export const PROVIDERS = {
   typesafe: { url: 'https://api.typesafe.ai/v1/systemone', keyEnv: 'TYPESAFE_API_KEY', model: 'jev-latest' },
-  vercel: { url: 'https://ai-gateway.vercel.sh/typesafe/v1/systemone', keyEnv: 'AI_GATEWAY_API_KEY', model: 'typesafe-ai/jev' },
+  vercel: {
+    url: 'https://ai-gateway.vercel.sh/typesafe/v1/systemone', keyEnv: 'AI_GATEWAY_API_KEY', model: 'typesafe-ai/jev',
+    providerOptions: { gateway: { only: ['typesafe-ai'] } },
+  },
 };
 
 const MAX_CANDIDATES = 300;
@@ -16,7 +19,8 @@ const EXCERPT_CHARS = 2400;
 const STATE_TOKEN_BUDGET = 24_000;
 const CHARS_PER_TOKEN = 3.5;
 const MAX_RATE_LIMIT_WAIT_MS = 90_000;
-const DEFAULT_RATE_LIMIT_WAIT_MS = 30_000;
+const REQUEST_TIMEOUT_MS = 30_000;
+const DEFAULT_MAX_RETRIES = 2;
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const LOCKFILES = new Set([
   'package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lock', 'bun.lockb',
@@ -26,8 +30,8 @@ const LOCKFILES = new Set([
 const STATE_CONTEXT =
   'A coding assistant is choosing which files to read for the goal below. Each entry in `files` is one candidate: its path and the start of its content, with indentation stripped. Each question asks whether the assistant must read that file to accomplish the goal.';
 
-const USAGE = `Usage: node ask-jev.mjs ask <request.json|-> [--provider auto|typesafe|vercel]
-       node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] <path|dir|glob>...`;
+const USAGE = `Usage: node ask-jev.mjs ask <request.json|-> [--provider auto|typesafe|vercel] [--max-retries 0..5]
+       node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] [--max-retries 0..5] <path|dir|glob>...`;
 
 class InputError extends Error {
   constructor(message, showUsage = false) {
@@ -46,7 +50,7 @@ export async function main(argv, io) {
     }
     if (args.command === 'ask') {
       const request = await readRequest(args.source, io);
-      const result = await ask(request, pickProvider(args.provider, io.env), io);
+      const result = await ask(request, pickProvider(args.provider, io.env), io, args.maxRetries);
       io.stdout.write(`${JSON.stringify(result)}\n`);
       return 0;
     }
@@ -54,7 +58,7 @@ export async function main(argv, io) {
     const { files, skipped } = collectFiles(args.targets, io.cwd);
     const batches = packBatches(files, args.goal);
     const scores = [];
-    for (const batch of batches) scores.push(...(await askBatch(batch, args.goal, access, io)));
+    for (const batch of batches) scores.push(...(await askBatch(batch, args.goal, access, io, args.maxRetries)));
     scores.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path));
     const seconds = ((io.now() - started) / 1000).toFixed(1);
     const skippedNote = skipped > 0 ? ` (skipped ${skipped} binary, lock or oversized)` : '';
@@ -94,6 +98,7 @@ function parseCli(argv) {
         min: { type: 'string' },
         help: { type: 'boolean' },
         provider: { type: 'string', default: 'auto' },
+        'max-retries': { type: 'string', default: String(DEFAULT_MAX_RETRIES) },
       },
     });
   } catch (error) {
@@ -103,12 +108,16 @@ function parseCli(argv) {
   const { goal, provider } = parsed.values;
   if (parsed.values.help) return { command: 'help' };
   if (provider !== 'auto' && !Object.hasOwn(PROVIDERS, provider)) throw new InputError(`unknown provider ${provider}`, true);
+  const maxRetries = Number(parsed.values['max-retries']);
+  if (!/^\d+$/.test(parsed.values['max-retries']) || !Number.isInteger(maxRetries) || maxRetries < 0 || maxRetries > 5) {
+    throw new InputError('--max-retries must be an integer from 0 to 5', true);
+  }
   if (command === 'ask') {
     for (const flag of ['goal', 'top', 'min']) {
       if (Object.hasOwn(parsed.values, flag)) throw new InputError(`--${flag} is only supported by files`, true);
     }
     if (targets.length !== 1) throw new InputError('ask requires one JSON path or - for stdin', true);
-    return { command, source: targets[0], provider };
+    return { command, source: targets[0], provider, maxRetries };
   }
   const top = Number(parsed.values.top ?? '8');
   const min = Number(parsed.values.min ?? '0.3');
@@ -117,7 +126,7 @@ function parseCli(argv) {
   if (targets.length === 0) throw new InputError('pass at least one path, directory or glob', true);
   if (!Number.isInteger(top) || top < 1) throw new InputError('--top must be a positive integer', true);
   if (!(min >= 0 && min <= 1)) throw new InputError('--min must be between 0 and 1', true);
-  return { command, goal: goal.trim(), top, min, provider, targets };
+  return { command, goal: goal.trim(), top, min, provider, maxRetries, targets };
 }
 
 function isObject(value) {
@@ -180,8 +189,10 @@ function inRange(value, maximum = 1) {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= maximum;
 }
 
-async function ask(request, access, io) {
-  const response = await postWithRetry(access, JSON.stringify({ model: access.model, ...request }), io);
+async function ask(request, access, io, maxRetries) {
+  const body = { model: access.model, ...request };
+  if (access.providerOptions) body.providerOptions = access.providerOptions;
+  const response = await postWithRetry(access, JSON.stringify(body), io, maxRetries);
   if (!isObject(response) || !isObject(response.answers)) throw new Error('Jev returned no answers object');
   for (const [id, question] of Object.entries(request.questions)) {
     const answer = Object.hasOwn(response.answers, id) ? response.answers[id] : undefined;
@@ -359,7 +370,7 @@ function packBatches(files, goal) {
   return batches;
 }
 
-async function askBatch(entries, goal, access, io) {
+async function askBatch(entries, goal, access, io, maxRetries) {
   const questions = Object.fromEntries(
     entries.map((entry) => [
       entry.id,
@@ -369,30 +380,42 @@ async function askBatch(entries, goal, access, io) {
       },
     ]),
   );
-  const response = await ask({ state: stateFor(entries, goal), questions }, access, io);
+  const response = await ask({ state: stateFor(entries, goal), questions }, access, io, maxRetries);
   return entries.map((entry) => ({ path: entry.path, score: response.answers[entry.id].noul }));
 }
 
-async function postWithRetry(access, body, io) {
+async function postWithRetry(access, body, io, maxRetries) {
   let waited = 0;
-  for (;;) {
-    const response = await io.fetch(access.url, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${access.apiKey}`, 'content-type': 'application/json' },
-      body,
-    });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    let response, text;
+    try {
+      response = await io.fetch(access.url, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${access.apiKey}`, 'content-type': 'application/json' },
+        body,
+        signal,
+      });
+      // Consume failures too: a 429 can describe gateway or provider trouble.
+      text = await response.text();
+    } catch (error) {
+      const detail = signal.aborted ? `timed out after ${REQUEST_TIMEOUT_MS / 1000} s` : error.message;
+      throw new Error(`Jev request failed via ${new URL(access.url).host}: ${safeDiagnostic(detail, access.apiKey)}`);
+    }
     if (response.status === 429) {
-      const waitMs = rateLimitWaitMs(response.headers);
-      if (waited + waitMs > MAX_RATE_LIMIT_WAIT_MS) {
-        throw new Error(`Jev is rate limited for another ${Math.ceil(waitMs / 1000)} s; gave up after waiting ${Math.round(waited / 1000)} s. Try again later.`);
+      const detail = httpFailure(access, response, text);
+      const stopped = `stopped after ${count(attempt + 1, 'attempt')} and ${waited / 1000} s of retry waits`;
+      if (attempt === maxRetries) throw new Error(`${detail}; ${stopped}`);
+      const delay = retryDelay(response.headers, attempt, io.now());
+      if (waited + delay.ms > MAX_RATE_LIMIT_WAIT_MS) {
+        throw new Error(`${detail}; retry delay ${delay.ms / 1000} s (${delay.source}) exceeds remaining retry wait budget ${(MAX_RATE_LIMIT_WAIT_MS - waited) / 1000} s; ${stopped}`);
       }
-      io.stderr.write(`ask-jev: rate limited, waiting ${Math.ceil(waitMs / 1000)} s\n`);
-      await io.sleep(waitMs);
-      waited += waitMs;
+      io.stderr.write(`ask-jev: ${detail}; retry ${attempt + 1}/${maxRetries} in ${delay.ms / 1000} s (${delay.source})\n`);
+      await io.sleep(delay.ms);
+      waited += delay.ms;
       continue;
     }
-    const text = await response.text();
-    if (!response.ok) throw new Error(`Jev request failed (${response.status}): ${text.slice(0, 200)}`);
+    if (!response.ok) throw new Error(httpFailure(access, response, text));
     try {
       return JSON.parse(text);
     } catch {
@@ -401,11 +424,50 @@ async function postWithRetry(access, body, io) {
   }
 }
 
-function rateLimitWaitMs(headers) {
+function retryDelay(headers, attempt, now) {
   const retryAfter = headers.get('retry-after')?.trim();
-  if (retryAfter && /^\d+(\.\d+)?$/.test(retryAfter)) return Number(retryAfter) * 1000;
+  if (retryAfter) {
+    if (/^\d+(\.\d+)?$/.test(retryAfter) && Number.isFinite(Number(retryAfter) * 1000)) {
+      return { ms: Number(retryAfter) * 1000, source: 'server Retry-After' };
+    }
+    const date = /[a-z]/i.test(retryAfter) ? Date.parse(retryAfter) : NaN;
+    if (Number.isFinite(date)) return { ms: Math.max(0, date - now), source: 'server Retry-After date' };
+  }
   const reset = headers.get('x-ratelimit-reset-requests')?.trim();
-  return (reset && durationMs(reset)) || DEFAULT_RATE_LIMIT_WAIT_MS;
+  const resetMs = reset ? durationMs(reset) : undefined;
+  if (Number.isFinite(resetMs)) return { ms: resetMs, source: 'server x-ratelimit-reset-requests' };
+  return { ms: 1000 * 2 ** attempt, source: 'local exponential backoff; no usable server retry timing' };
+}
+
+function safeDiagnostic(value, apiKey, limit = 2000) {
+  return String(value).split(apiKey).join('[redacted]')
+    .replace(/Bearer\s+[^\s"\\]+/gi, 'Bearer [redacted]')
+    .replace(/[\x00-\x1f\x7f]/g, ' ').slice(0, limit);
+}
+
+function httpFailure(access, response, text) {
+  let payload;
+  try { payload = JSON.parse(text); } catch { /* Some servers return plain text. */ }
+  const error = payload?.error ?? payload;
+  const message = typeof error === 'string' ? error : error?.message;
+  const parts = [safeDiagnostic(message ?? (text || '(empty response body)'), access.apiKey, 600)];
+  const code = error?.type ?? error?.code;
+  if (code !== undefined) parts.push(`error_type=${safeDiagnostic(code, access.apiKey, 120)}`);
+  for (const name of ['retry-after', 'x-ratelimit-limit-requests', 'x-ratelimit-remaining-requests',
+    'x-ratelimit-reset-requests', 'x-request-id', 'request-id', 'x-vercel-id']) {
+    const value = response.headers.get(name);
+    if (value) parts.push(`${name}=${safeDiagnostic(value, access.apiKey, 160)}`);
+  }
+  const gateway = payload?.providerMetadata?.gateway ?? payload?.provider_metadata?.gateway;
+  if (gateway?.generationId) parts.push(`generation_id=${safeDiagnostic(gateway.generationId, access.apiKey, 160)}`);
+  const routing = gateway?.routing;
+  if (Number.isInteger(routing?.totalProviderAttemptCount)) parts.push(`provider_attempts=${routing.totalProviderAttemptCount}`);
+  if (Array.isArray(routing?.skippedProviderAttempts)) {
+    for (const skipped of routing.skippedProviderAttempts.slice(0, 3)) {
+      parts.push(`skipped_provider=${safeDiagnostic(skipped?.provider, access.apiKey, 80)}:${safeDiagnostic(skipped?.reason, access.apiKey, 120)}`);
+    }
+  }
+  return `Jev request failed (HTTP ${response.status} via ${new URL(access.url).host}): ${parts.join('; ')}`;
 }
 
 const UNIT_MS = { ms: 1, s: 1000, m: 60_000, h: 3_600_000 };

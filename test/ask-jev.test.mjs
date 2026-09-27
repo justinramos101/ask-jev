@@ -122,7 +122,8 @@ test('waits out a 429 for the retry-after seconds, then retries', async () => {
   assert.equal(result.code, 0);
   assert.deepEqual(result.sleeps, [7000]);
   assert.equal(result.requests.length, 2);
-  assert.equal(result.stderr, 'ask-jev: rate limited, waiting 7 s\n');
+  assert.match(result.stderr, /HTTP 429 via ai-gateway\.vercel\.sh\): rate limited/);
+  assert.match(result.stderr, /retry 1\/2 in 7 s \(server Retry-After\)/);
   assert.equal(result.stdout, 'Scored 1 file in 1 request, 0.0 s.\n0.80  a.ts\n');
 });
 
@@ -135,6 +136,16 @@ test('falls back to x-ratelimit-reset-requests when retry-after is absent', asyn
   assert.deepEqual(result.sleeps, [62000]);
 });
 
+test('files respects --max-retries 0', async () => {
+  const cwd = project({ 'a.ts': 'a' });
+  const jev = fakeJev({ responses: [tooMany({ 'retry-after': '7' })] });
+  const result = await run(['files', '--goal', 'x', '--max-retries', '0', 'a.ts'], { cwd, jev });
+  assert.equal(result.code, 1);
+  assert.equal(result.requests.length, 1);
+  assert.deepEqual(result.sleeps, []);
+  assert.equal(result.stdout, '');
+});
+
 test('gives up when the rate limit wait passes 90 seconds', async () => {
   const cwd = project({ 'a.ts': 'a' });
   const jev = fakeJev({ responses: [tooMany({ 'retry-after': '60' }), tooMany({ 'retry-after': '45' })] });
@@ -144,10 +155,9 @@ test('gives up when the rate limit wait passes 90 seconds', async () => {
   assert.equal(result.code, 1);
   assert.deepEqual(result.sleeps, [60000]);
   assert.equal(result.stdout, '');
-  assert.equal(
-    result.stderr,
-    'ask-jev: rate limited, waiting 60 s\nask-jev: Jev is rate limited for another 45 s; gave up after waiting 60 s. Try again later.\n',
-  );
+  assert.equal(result.requests.length, 2);
+  assert.match(result.stderr, /retry 1\/2 in 60 s \(server Retry-After\)/);
+  assert.match(result.stderr, /retry delay 45 s .* exceeds remaining retry wait budget 30 s; stopped after 2 attempts and 60 s of retry waits/);
 });
 
 test('skips binary files, lockfiles and files over 200 KB', async () => {
