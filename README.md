@@ -1,6 +1,8 @@
 # ask-jev
 
-Use `ask-jev` to consult Jev from your agent. Ask it to choose an approach, score candidates, check a claim against evidence, or rank files to read. You supply the context and questions. Jev returns structured answers with probabilities.
+Use `ask-jev` to consult Jev whenever a task or feature needs semantic understanding or programmable common sense. It covers the use cases in `typesafe-ai`: routing and typed arguments, extraction and structure recovery, search and ranking, entity matching, reusable scores and ML features, verification and guardrails, and decisions over changing application state. These are starting points, not limits. The agent gathers context and frames focused questions; Jev returns typed answers with probabilities.
+
+The skill also applies when brainstorming AI features or replacing an LLM prompt-and-parse step with structured decisions. Keep deterministic rules, calculations, and exact lookups in code, and use Jev for the semantic steps within the workflow.
 
 Jev does not inspect your workspace, generate explanations, or execute actions. The [skill workflow](skills/ask-jev/SKILL.md) tells the agent how to frame questions and use the answers.
 

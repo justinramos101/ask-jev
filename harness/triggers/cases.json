@@ -34,6 +34,86 @@
       ]
     },
     {
+      "id": "function-arguments",
+      "split": "development",
+      "prompt": "Read home.json. Map the resident's request to one of the available functions and fill its typed arguments. Interpret their intent and the household context. Return the proposed call without executing it.",
+      "files": {
+        "home.json": "{\"request\":\"Have the room where we cook feel cozy by the time we eat tonight.\",\"rooms\":{\"kitchen\":\"cooking and meals\",\"study\":\"work\"},\"modes\":{\"eco\":\"minimal heating\",\"comfort\":\"comfortable occupied temperature\"},\"dinner_time\":\"18:00\",\"functions\":{\"set_mode\":[\"room\",\"mode\"],\"schedule_mode\":[\"room\",\"mode\",\"time\"]}}\n"
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "semantic-extraction",
+      "split": "development",
+      "prompt": "Read thread.txt. Extract the amount that the customer is now expected to pay before work begins, copying the exact amount from the source. Several amounts appear; choose by their meaning in the conversation.",
+      "files": {
+        "thread.txt": "Vendor: The first estimate was $2,400 with $600 to reserve a slot. Customer: We added the extra room. Vendor: The revised total is $2,700. To hold the date, send $650 when you approve; the rest is due after installation. Customer: Approved, please hold that date."
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "structure-recovery",
+      "split": "development",
+      "prompt": "Restore reasonable Markdown structure to handout.txt based on the meaning of its lines. Infer headings, prose, and list items; preserve the wording. Write handout.md.",
+      "files": {
+        "handout.txt": "Before the workshop\nBring a laptop\nInstall the sample project\nThese steps let everyone start the exercises together.\nDuring the workshop\nPair with a neighbor\nCompare your results\nIf the sample fails, ask the facilitator for help.\n"
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "semantic-retrieval",
+      "split": "development",
+      "prompt": "From passages.json, select the most useful passage for someone asking, 'How can I get back work I accidentally threw away?' Match the intent even where the words differ. Return its ID and a short reason.",
+      "files": {
+        "passages.json": "[{\"id\":\"archive\",\"text\":\"Archived projects stay searchable but disappear from the active list.\"},{\"id\":\"recover\",\"text\":\"Deleted documents remain in the recycle bin for thirty days. Restore returns them to their original folder.\"},{\"id\":\"redo\",\"text\":\"Redo reapplies the most recently reversed edit in the current document.\"}]\n"
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "reusable-features",
+      "split": "development",
+      "prompt": "Turn the language in notes.json into reusable numeric features for a future renewal model. Score signs of dissatisfaction, switching intent, and expansion interest separately for each account. Preserve the separate signals so we can change weights later; do not predict renewal from this tiny sample.",
+      "files": {
+        "notes.json": "[{\"account\":\"A\",\"note\":\"We spend every Friday repairing exports. Another vendor is running a pilot with our team.\"},{\"account\":\"B\",\"note\":\"The support fix helped. Two more departments want access next quarter.\"}]\n"
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "stateful-interaction",
+      "split": "development",
+      "prompt": "Read scene.json and choose the guide character's next behavior from the available actions. Interpret the visitor's intent in the current scene, distinguishing what is observed from what is inferred. This is one step of an interactive simulation.",
+      "files": {
+        "scene.json": "{\"goal\":\"Help a visitor enjoy the museum at their own pace\",\"previous_state\":\"The visitor asked for the long tour\",\"observations\":[\"Visitor now sits down and rubs their feet\",\"Visitor says: That is a lot to take in. Is there somewhere quiet nearby?\"],\"actions\":[\"continue_long_tour\",\"offer_quiet_seating\",\"start_interactive_quiz\"]}\n"
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "ai-feature-brainstorm",
+      "split": "development",
+      "prompt": "Read app.md and brainstorm three useful AI features for this app. Recommend a starting point, identify the semantic decisions it would need, and walk through one hypothetical example. Keep this at the design stage.",
+      "files": {
+        "app.md": "We maintain a shared reading app for small research clubs. Members save article excerpts, record open questions in ordinary language, and mark sessions as beginner or advanced. They want help connecting related excerpts and choosing what to discuss next. The app should keep the source text visible and avoid inventing article summaries."
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
+      "id": "replace-prompt-parse",
+      "split": "development",
+      "prompt": "Read workflow.md. Design a replacement for this LLM prompt-and-parse step using typed semantic decisions. Show the questions and how code would consume the answers, and try the supplied example. No production integration is needed yet.",
+      "files": {
+        "workflow.md": "Our app asks a text-generating LLM to output JSON with a feedback category and whether follow-up is needed, then repairs malformed JSON. Categories: bug, feature request, praise, other. Several categories can apply. Example: 'Love the new board, but dragging a card sometimes makes it disappear. Could you also add keyboard shortcuts?' Follow-up is warranted when the user reports a problem that needs diagnosis."
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
       "id": "completion-audit",
       "split": "development",
       "prompt": "Audit report.md against records.md. Which claims are supported, contradicted, or still unverified? Preserve the distinction between missing evidence and false claims.",

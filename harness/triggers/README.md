@@ -6,6 +6,8 @@ A successful trigger requires observable exposure to the installed skill body. M
 
 The [recorded live run](results/2026-09-27.md) covers 29 trials across 23 cases. It predates the `requirements-done` and `acceptance-check` cases and the requirement-check wording in the `jev-check-evidence` description. A [later development run](results/2026-09-27-requirements.md) covers 18 trials after that change.
 
+The [TypeSafe scope run](results/2026-09-27-typesafe-scope.md) covers eight new implicit `ask-jev` use cases, one existing requirement audit, and four exclusion cases after broadening the trigger. All 13 routes passed in that development run.
+
 ## Run the suite
 
 Install and authenticate the Codex CLI. Configure a Jev provider key in the shell that starts this command. The suite makes real Codex and Jev calls, so runs incur usage costs. It uses the production skills and runner without stubs.
@@ -33,6 +35,8 @@ Review failures and raw evidence before changing skill descriptions. Preserve th
 [cases.json](cases.json) contains the task prompt, fixture files, required skill set, allowed skill set, and development or holdout split. Expected sets stay in the parent harness. Agents see the ordinary task and its files, plus the installed skill catalog.
 
 Specialized workflows require their own skill and the `ask-jev` dependency. A combined audit requires all three. Deterministic lookups, literal edits, quoted skill names, and an explicit provider opt-out are negative cases. Explicit-name cases use ordinary prose rather than native dollar-sign expansion, so skill-body reads remain observable.
+
+The TypeSafe scope cases exercise function arguments, semantic value extraction, structure recovery, retrieval, reusable ML features, changing-state interaction, AI-feature brainstorming, and replacement of LLM prompt-and-parse steps. They ask for ordinary work without naming Jev. They are development cases for the broader `ask-jev` trigger; their presence alone does not establish that the routes pass.
 
 The offline tests require every repository skill to have a positive case and an excluded negative case. Adding a skill without declaring it in this suite fails validation.
 
