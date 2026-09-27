@@ -2,21 +2,21 @@
   "state": {
     "claim": {
       "id": "C1",
-      "text": "The retry idempotency test passed in every run at the current revision.",
+      "text": "The current revision passes the CSV export integration check.",
       "target_revision": "r2"
     },
     "evidence": [
       {
         "id": "E1",
-        "source": "summary-a.txt",
-        "revision": "r2",
-        "excerpt": "Complete record for runs A and B: retry idempotency passed in both runs."
+        "source": "old-run.txt",
+        "revision": "r1",
+        "excerpt": "CSV export integration check: FAIL. The output omits the last row."
       },
       {
         "id": "E2",
-        "source": "summary-b.txt",
+        "source": "current-run.txt",
         "revision": "r2",
-        "excerpt": "Complete record for the same runs A and B: retry idempotency passed in A and failed in B."
+        "excerpt": "CSV export integration check: PASS. All expected rows are present."
       }
     ],
     "limitations": [

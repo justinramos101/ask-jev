@@ -2,15 +2,15 @@
   "state": {
     "claim": {
       "id": "C1",
-      "text": "The retry idempotency test did not pass at the current revision.",
+      "text": "The CSV export integration check passed at the current revision.",
       "target_revision": "r2"
     },
     "evidence": [
       {
         "id": "E1",
-        "source": "test-run.txt",
+        "source": "export.spec.mjs",
         "revision": "r2",
-        "excerpt": "Command: node --test test/retry.test.mjs. Exit code: 0. PASS retrying the same request creates exactly one record."
+        "excerpt": "The test creates a CSV export and asserts that its rows equal the expected rows. No execution output or exit status is available."
       }
     ],
     "limitations": [

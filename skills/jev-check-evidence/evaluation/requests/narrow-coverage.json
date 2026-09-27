@@ -2,15 +2,15 @@
   "state": {
     "claim": {
       "id": "C1",
-      "text": "The retry idempotency test did not pass at the current revision.",
+      "text": "The current revision has a test for a timeout followed by a successful retry.",
       "target_revision": "r2"
     },
     "evidence": [
       {
         "id": "E1",
-        "source": "test-run.txt",
+        "source": "retry.spec.mjs",
         "revision": "r2",
-        "excerpt": "Command: node --test test/retry.test.mjs. Exit code: 0. PASS retrying the same request creates exactly one record."
+        "excerpt": "The test invokes send(). The first mocked attempt times out. The second succeeds. It asserts two attempts and the successful result. Other tests are omitted from this excerpt."
       }
     ],
     "limitations": [

@@ -2,6 +2,8 @@
 
 Use these synthetic fixtures to check whether the workflow distinguishes support, contradiction, missing evidence, and conflicting evidence. These are development examples, not a representative benchmark or a held-out test set.
 
+The [live smoke evaluation](live-results.md) records an initial wording failure, the revised questions, and results from twelve fixtures.
+
 ## Run the requests
 
 1. Locate the installed `ask-jev` runner and configure a provider as described in that skill.

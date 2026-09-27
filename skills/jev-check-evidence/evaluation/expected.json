@@ -46,5 +46,29 @@
     "contradiction": true,
     "disposition": "contradicted",
     "follow_up": "Correct the negated claim using the passing test record."
+  },
+  "conflict-reversed": {
+    "support": true,
+    "contradiction": true,
+    "disposition": "conflicting_evidence",
+    "follow_up": "Inspect both original runs and their conditions before reporting a consistent pass."
+  },
+  "current-over-stale": {
+    "support": true,
+    "contradiction": false,
+    "disposition": "supported",
+    "follow_up": "Retain the narrow current-pass claim after inspecting the r2 run."
+  },
+  "narrow-coverage": {
+    "support": true,
+    "contradiction": false,
+    "disposition": "supported",
+    "follow_up": "Retain the narrow test-existence claim without claiming that it passed."
+  },
+  "assertion-not-execution": {
+    "support": false,
+    "contradiction": false,
+    "disposition": "insufficient_evidence",
+    "follow_up": "Run the integration check. A test definition does not show that it passed."
   }
 }
