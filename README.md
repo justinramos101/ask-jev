@@ -42,7 +42,7 @@ To install for one project, use that project's `.claude/skills` or `.agents/skil
 
 ## Check evidence in agent reports
 
-Install the optional `jev-check-evidence` skill alongside `ask-jev` to audit claims in completion reports, PR descriptions, and research summaries:
+Install the optional `jev-check-evidence` skill alongside `ask-jev` to audit claims in completion reports, PR descriptions, and research summaries. It also checks whether work meets the requirements of a task or issue:
 
 ```sh
 npx skills add justinramos101/ask-jev --skill jev-check-evidence
@@ -54,7 +54,11 @@ Ask your agent:
 
 > Use jev-check-evidence to audit this completion report against the implementation and actual test output. Identify unsupported claims and the checks still needed.
 
-The [evidence-checking skill](skills/jev-check-evidence/SKILL.md) asks separate questions about support and contradiction. The agent inspects the original sources before retaining or correcting a claim. The [evaluation fixtures](skills/jev-check-evidence/evaluation/README.md) cover missing evidence, partial coverage, stale revisions, conflicting records, and instructions embedded in source text. They do not establish judgment quality without live evaluation.
+Or:
+
+> Use jev-check-evidence to check whether this branch meets the acceptance criteria in issue #41. List any requirement without evidence.
+
+The [evidence-checking skill](skills/jev-check-evidence/SKILL.md) asks separate questions about support and contradiction. For requirements, it restates each one as a claim about the work, so omissions a report never mentions still get checked. The agent inspects the original sources before retaining or correcting a claim. The [evaluation fixtures](skills/jev-check-evidence/evaluation/README.md) cover missing evidence, partial coverage, stale revisions, conflicting records, unaddressed requirements, and instructions embedded in source text. They do not establish judgment quality without live evaluation.
 
 ## Lint documentation and agent instructions
 

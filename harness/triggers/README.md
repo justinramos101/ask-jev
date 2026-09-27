@@ -4,7 +4,7 @@ Run native Codex tasks to measure whether the agent loads the intended Jev skill
 
 A successful trigger requires observable exposure to the installed skill body. Mentioning the skill in an answer or naming its runner in a command is not enough.
 
-The [recorded live run](results/2026-09-27.md) covers 29 trials across 23 cases.
+The [recorded live run](results/2026-09-27.md) covers 29 trials across 23 cases. It predates the `requirements-done` and `acceptance-check` cases and the requirement-check wording in the `jev-check-evidence` description. A [later development run](results/2026-09-27-requirements.md) covers 18 trials after that change.
 
 ## Run the suite
 

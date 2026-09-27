@@ -70,5 +70,41 @@
     "contradiction": false,
     "disposition": "insufficient_evidence",
     "follow_up": "Run the integration check. A test definition does not show that it passed."
+  },
+  "requirement-met": {
+    "support": true,
+    "contradiction": false,
+    "disposition": "supported",
+    "follow_up": "Inspect the current test run and mark acceptance criterion 1 as met."
+  },
+  "requirement-paraphrase": {
+    "support": true,
+    "contradiction": false,
+    "disposition": "supported",
+    "follow_up": "Inspect the end-to-end run and mark the user story as met."
+  },
+  "requirement-flag-only": {
+    "support": false,
+    "contradiction": false,
+    "disposition": "insufficient_evidence",
+    "follow_up": "Run export with --dry-run and check that no files are written. A parser option does not show the behavior."
+  },
+  "requirement-unaddressed": {
+    "support": false,
+    "contradiction": false,
+    "disposition": "insufficient_evidence",
+    "follow_up": "Report the retry limit as unaddressed. Implement or test it before calling the work complete."
+  },
+  "requirement-unmet": {
+    "support": false,
+    "contradiction": true,
+    "disposition": "contradicted",
+    "follow_up": "Report the unmet retry limit and investigate the extra attempts."
+  },
+  "requirement-partial-scope": {
+    "support": false,
+    "contradiction": false,
+    "disposition": "insufficient_evidence",
+    "follow_up": "Run a YAML config check before marking the requirement met. Do not treat missing coverage as a failure."
   }
 }
