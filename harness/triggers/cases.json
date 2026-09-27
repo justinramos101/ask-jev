@@ -1,0 +1,323 @@
+{
+  "skills": [
+    "ask-jev",
+    "jev-check-evidence",
+    "jev-semantic-lint"
+  ],
+  "cases": [
+    {
+      "id": "incident-choice",
+      "split": "development",
+      "prompt": "Read incident.md. Which of the proposed investigations should we prioritize, given the evidence and the cost of chasing the wrong explanation? Keep the recommendation brief.",
+      "files": {
+        "incident.md": "Uploads fail intermittently after a storage connection has been idle. Authentication succeeds. Downloads succeed. Client retries run but do not recover. Storage logs show reset connections. The three candidate investigations are authentication, storage connection reuse, or client retry UI. Each investigation takes about one hour. No reproduction environment is available."
+      },
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "approach-ranking",
+      "split": "development",
+      "prompt": "Read options.md and rank the three approaches for this team. Use the stated constraints and explain the main tradeoff. Do not build anything.",
+      "files": {
+        "options.md": "Choose a documentation search approach for a small support team. Option A uses exact keywords with no ongoing service cost but misses paraphrases. Option B uses embeddings with a modest service cost and finds paraphrases but can return near matches. Option C uses an LLM to read every document per query, with higher latency and cost. Most questions use customer phrasing that differs from our docs. The team needs source citations and can manually inspect results. This is a qualitative tradeoff decision, not a benchmark."
+      },
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "completion-audit",
+      "split": "development",
+      "prompt": "Audit report.md against records.md. Which claims are supported, contradicted, or still unverified? Preserve the distinction between missing evidence and false claims.",
+      "files": {
+        "report.md": "At revision r2 we completed offline support. All synchronization failure modes are covered, and users can safely edit while disconnected. Verification is complete.",
+        "records.md": "Target revision: r2. The implementation queues edits while offline. The only supplied execution record is a passing online-login check at r2. A retry check passed at r1. No current synchronization failure-mode coverage report or offline execution record is available. These are the complete records supplied for this review."
+      },
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "summary-audit",
+      "split": "development",
+      "prompt": "Review summary.md against sources.md before I send it. Identify statements that overreach their sources and propose evidence-backed wording.",
+      "files": {
+        "summary.md": "The team adopted the three-day retention plan. The rollout is complete in every region.",
+        "sources.md": "S1, meeting notes from Monday: the team favored a three-day plan but deferred the final decision. S2, deployment notes from Friday: the new retention option is live in the west region; east is scheduled for next week. No final approval record is supplied."
+      },
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "instruction-rules",
+      "split": "development",
+      "prompt": "Check guide.md against policy.md for contradictory or ambiguous instructions. Cite each defect and suggest the smallest correction. Do not edit files.",
+      "files": {
+        "policy.md": "R1: Operative instructions for the same worker and conditions must not require incompatible actions. Explicit exceptions are allowed. R2: Required document edits must name their target when multiple files are available.",
+        "guide.md": "For every failed upload, the worker must retry exactly once. For every failed upload, the worker must never retry. Both draft.md and published.md are available. Update it before requesting review."
+      },
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "rubric-review",
+      "split": "development",
+      "prompt": "Inspect criteria.md against requirements.md. Is this suitable for consistent grading? Flag semantic defects without grading an answer.",
+      "files": {
+        "criteria.md": "Choose exactly one level. Level 0: no citations. Level 1: at least one citation. Level 2: at least two citations. No tie-breaker is provided.",
+        "requirements.md": "The levels must be mutually exclusive or provide an unambiguous tie-breaker. Each level must describe an observable output property."
+      },
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "combined-audit",
+      "split": "development",
+      "prompt": "Do two checks. First, audit the claims in report.md against records.md. Second, inspect guide.md against policy.md for contradictory or ambiguous directions. Keep the two finding lists separate.",
+      "files": {
+        "report.md": "At revision r2 we completed offline support. All synchronization failure modes are covered, and users can safely edit while disconnected. Verification is complete.",
+        "records.md": "Target revision: r2. The implementation queues edits while offline. The only supplied execution record is a passing online-login check at r2. A retry check passed at r1. No current synchronization failure-mode coverage report or offline execution record is available. These are the complete records supplied for this review.",
+        "policy.md": "R1: Operative instructions for the same worker and conditions must not require incompatible actions. Explicit exceptions are allowed. R2: Required document edits must name their target when multiple files are available.",
+        "guide.md": "For every failed upload, the worker must retry exactly once. For every failed upload, the worker must never retry. Both draft.md and published.md are available. Update it before requesting review."
+      },
+      "required": [
+        "ask-jev",
+        "jev-check-evidence",
+        "jev-semantic-lint"
+      ],
+      "allowed": [
+        "ask-jev",
+        "jev-check-evidence",
+        "jev-semantic-lint"
+      ]
+    },
+    {
+      "id": "explicit-ask",
+      "split": "development",
+      "prompt": "Use the ask-jev skill to choose the next investigation from incident.md. Give a brief recommendation.",
+      "files": {
+        "incident.md": "Uploads fail intermittently after a storage connection has been idle. Authentication succeeds. Downloads succeed. Client retries run but do not recover. Storage logs show reset connections. The three candidate investigations are authentication, storage connection reuse, or client retry UI. Each investigation takes about one hour. No reproduction environment is available."
+      },
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "explicit-evidence",
+      "split": "development",
+      "prompt": "Use the jev-check-evidence skill to audit report.md against records.md. Keep it brief.",
+      "files": {
+        "report.md": "At revision r2 we completed offline support. All synchronization failure modes are covered, and users can safely edit while disconnected. Verification is complete.",
+        "records.md": "Target revision: r2. The implementation queues edits while offline. The only supplied execution record is a passing online-login check at r2. A retry check passed at r1. No current synchronization failure-mode coverage report or offline execution record is available. These are the complete records supplied for this review."
+      },
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "explicit-lint",
+      "split": "development",
+      "prompt": "Use the jev-semantic-lint skill to inspect guide.md against policy.md. Propose edits without applying them.",
+      "files": {
+        "policy.md": "R1: Operative instructions for the same worker and conditions must not require incompatible actions. Explicit exceptions are allowed. R2: Required document edits must name their target when multiple files are available.",
+        "guide.md": "For every failed upload, the worker must retry exactly once. For every failed upload, the worker must never retry. Both draft.md and published.md are available. Update it before requesting review."
+      },
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "list-files",
+      "split": "development",
+      "prompt": "List the filenames in notes/. Do not read their contents.",
+      "files": {
+        "notes/alpha.md": "alpha",
+        "notes/beta.md": "beta"
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "literal-edit",
+      "split": "development",
+      "prompt": "In guide.md, replace the exact misspelling \"recieve\" with \"receive\". Make only that literal replacement.",
+      "files": {
+        "guide.md": "Workers recieve a receipt after upload."
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "read-exit-code",
+      "split": "development",
+      "prompt": "Read run.txt and tell me the recorded command exit code. No interpretation or broader audit is needed.",
+      "files": {
+        "run.txt": "Command: verify-upload\nExit code: 3\n"
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "calculate-total",
+      "split": "development",
+      "prompt": "Read counts.json and calculate the sum of its three counts.",
+      "files": {
+        "counts.json": "{\"queued\":12,\"running\":3,\"finished\":27}\n"
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "quoted-name",
+      "split": "development",
+      "prompt": "In note.md, count literal occurrences of the string \"ask-jev\". Report only the count.",
+      "files": {
+        "note.md": "ask-jev is mentioned here. Another mention: ask-jev. The third is ask-jev.\n"
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "explain-code",
+      "split": "development",
+      "prompt": "Explain what the function in clamp.js returns for an input below zero, between zero and ten, and above ten. Use the code directly.",
+      "files": {
+        "clamp.js": "export const clamp = (x) => Math.max(0, Math.min(10, x));\n"
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "decline-provider",
+      "split": "development",
+      "prompt": "Read incident.md and recommend one of the investigations yourself. Do not consult Jev or any external provider for this request.",
+      "files": {
+        "incident.md": "Uploads fail intermittently after a storage connection has been idle. Authentication succeeds. Downloads succeed. Client retries run but do not recover. Storage logs show reset connections. The three candidate investigations are authentication, storage connection reuse, or client retry UI. Each investigation takes about one hour. No reproduction environment is available."
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "support-triage",
+      "split": "holdout",
+      "prompt": "Read ticket.md and choose which team should investigate first. We need a judgment about the likely owner, not a command to run.",
+      "files": {
+        "ticket.md": "The user can sign in and browse products. Checkout fails after the payment provider callback, with a receipt-write timeout. Candidate owners: identity, catalog, payments. None of the teams has yet reproduced the failure. Explain which owner has the strongest evidence and what remains uncertain."
+      },
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "release-claims",
+      "split": "holdout",
+      "prompt": "Before publication, assess the assertions in release.md using evidence.md. Distinguish established statements from ones that need more evidence.",
+      "files": {
+        "release.md": "The migration is fully verified and safe across all supported database engines.",
+        "evidence.md": "The patch adds migration code for PostgreSQL and SQLite. The supplied run log shows a PostgreSQL check passed. SQLite was not exercised. No data-preservation check is supplied."
+      },
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "agent-handoff",
+      "split": "holdout",
+      "prompt": "Review handoff.md against contract.md. Find meaning-level conflicts or unclear action targets, and propose a corrected passage.",
+      "files": {
+        "contract.md": "Each mandatory handoff action must name its actor. Do not assign incompatible mandatory actions to the same actor under the same condition.",
+        "handoff.md": "When a report is overdue, the coordinator must archive it immediately. When a report is overdue, the coordinator must keep it unarchived until the reviewer replies."
+      },
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "extract-title",
+      "split": "holdout",
+      "prompt": "What is the title of the document in page.md? Copy only the heading text.",
+      "files": {
+        "page.md": "# Deployment handbook\n\nThe guide covers release operations."
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "translate-quoted-rule",
+      "split": "holdout",
+      "prompt": "Translate the sentence in sentence.txt into Spanish. Preserve its meaning; do not review or apply the instruction.",
+      "files": {
+        "sentence.txt": "The agent must check all claims against evidence before publishing."
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "rename-heading",
+      "split": "holdout",
+      "prompt": "Change the heading \"Usage\" to \"Getting started\" in guide.md and leave the body unchanged.",
+      "files": {
+        "guide.md": "# Usage\n\nRun the supplied command to start the application.\n"
+      },
+      "required": [],
+      "allowed": []
+    }
+  ]
+}
