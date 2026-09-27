@@ -209,7 +209,7 @@ function pickProvider(choice, env) {
     const apiKey = env[PROVIDERS[name].keyEnv];
     if (apiKey) return { ...PROVIDERS[name], apiKey };
   }
-  throw new InputError(`set ${order.map((name) => PROVIDERS[name].keyEnv).join(' or ')}`);
+  throw new InputError(`no API key, so Jev was not called. Set ${order.map((name) => PROVIDERS[name].keyEnv).join(' or ')} in the environment that starts the agent.`);
 }
 
 function collectFiles(targets, cwd) {
