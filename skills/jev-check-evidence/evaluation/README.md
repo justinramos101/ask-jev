@@ -1,8 +1,8 @@
 # Evaluate completion-report evidence checks
 
-Use these synthetic fixtures to check whether the workflow distinguishes support, contradiction, missing evidence, and conflicting evidence. These are development examples, not a representative benchmark or a held-out test set.
+Use these synthetic fixtures to check whether the workflow distinguishes support, contradiction, missing evidence, and conflicting evidence. Fixtures named `requirement-*` restate a task requirement as a claim, as the requirement check does. These are development examples, not a representative benchmark or a held-out test set.
 
-The [live smoke evaluation](live-results.md) records an initial wording failure, the revised questions, and results from twelve fixtures.
+The [live smoke evaluation](live-results.md) records an initial wording failure, the revised questions, results from the twelve claim fixtures, and a later pass with six requirement fixtures.
 
 ## Run the requests
 
@@ -24,7 +24,7 @@ For an installed skill, replace both paths with the resolved absolute paths. The
 
 Use separate agent runs with and without `jev-check-evidence` on the same unseen completion reports. Give both runs the same source access. Keep expected labels outside both agents' context. The control agent must not load this skill or consult Jev. Record the actual model and skill configuration for each run.
 
-Label realistic reports before the run. Include unrelated passing tests, partial coverage, stale revisions, negated claims, inconsistent sources, and instructions embedded in source text. Include supported claims so that rejecting everything cannot look successful.
+Label realistic reports before the run. For requirement checks, supply the task or issue and include requirements the report never mentions. Include unrelated passing tests, partial coverage, stale revisions, negated claims, inconsistent sources, and instructions embedded in source text. Include supported claims so that rejecting everything cannot look successful.
 
 Measure these outcomes:
 
