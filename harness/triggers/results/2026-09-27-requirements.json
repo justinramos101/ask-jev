@@ -1,0 +1,502 @@
+{
+  "date": "2026-09-27",
+  "collectorCommit": "b36e1fb0790c93ee1f79c9ff60460a51cbe2658d",
+  "collectorHash": "ee054ebf1cbbae9d3b5c843fcb87d10cbac31f677988a3e81b5079584e2af1b6",
+  "caseHash": "69f1610a58e424fe421a8a8ee01fadbaf40ac53f14df293ff4656b82a25949ee",
+  "skillSourceCommit": "3ccdaf8747a4352aaf266acb477b049a1e5df623",
+  "requestedModel": "gpt-6-astra",
+  "requestedEffort": "medium",
+  "observedAgentModel": null,
+  "codexVersion": "codex-cli 0.157.1",
+  "skillHashes": {
+    "ask-jev": {
+      "directory": "2a7f3808763831200f8e605f60abe8c14d91cb00d3334fcabfb0faa582d57245",
+      "document": "88158c31d674b397dbb9d62c87a7bfe8458d6c420882f137574060b186d041a1"
+    },
+    "jev-check-evidence": {
+      "directory": "04e6d36acb38ba84cba2481c0ff10851b6f311b8ff0553ba77679321e7dd0f4d",
+      "document": "69a6a947cf0a50f2e76a58610fb991a2b86ae07cad818b622e8886371c48ee02"
+    },
+    "jev-semantic-lint": {
+      "directory": "48f8280d19253accbb088990798dfe382d5e72b19be10b0d4b3cc468bab280d9",
+      "document": "5838f3219396001089e33a7e36e3989c151d9cdc901ac2dc72f5b20e55a7b4e6"
+    }
+  },
+  "summary": {
+    "total": 18,
+    "completed": 18,
+    "routePassed": 18,
+    "completionRate": 1,
+    "perSkill": {
+      "ask-jev": {
+        "positives": {
+          "passed": 11,
+          "total": 11
+        },
+        "negatives": {
+          "passed": 7,
+          "total": 7
+        }
+      },
+      "jev-check-evidence": {
+        "positives": {
+          "passed": 5,
+          "total": 5
+        },
+        "negatives": {
+          "passed": 13,
+          "total": 13
+        }
+      },
+      "jev-semantic-lint": {
+        "positives": {
+          "passed": 4,
+          "total": 4
+        },
+        "negatives": {
+          "passed": 14,
+          "total": 14
+        }
+      }
+    },
+    "failureStatuses": {}
+  },
+  "runs": [
+    {
+      "caseId": "incident-choice",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_1"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "direct",
+      "wallSeconds": 25.5
+    },
+    {
+      "caseId": "approach-ranking",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "reviewed-wrapper",
+      "wallSeconds": 30.2
+    },
+    {
+      "caseId": "completion-audit",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-check-evidence"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-check-evidence",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "reviewed-wrapper",
+      "wallSeconds": 41.9
+    },
+    {
+      "caseId": "summary-audit",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-check-evidence"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-check-evidence",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "reviewed-wrapper",
+      "wallSeconds": 46.6
+    },
+    {
+      "caseId": "requirements-done",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-check-evidence"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-check-evidence",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "reviewed-wrapper",
+      "wallSeconds": 34.8
+    },
+    {
+      "caseId": "instruction-rules",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-semantic-lint"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-semantic-lint",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 26
+    },
+    {
+      "caseId": "rubric-review",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-semantic-lint"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-semantic-lint",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 26
+    },
+    {
+      "caseId": "combined-audit",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "ask-jev",
+        "jev-check-evidence",
+        "jev-semantic-lint"
+      ],
+      "allowed": [
+        "ask-jev",
+        "jev-check-evidence",
+        "jev-semantic-lint"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-check-evidence",
+        "jev-semantic-lint"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-check-evidence",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-semantic-lint",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 2,
+      "jevInvocation": "direct",
+      "wallSeconds": 55.5
+    },
+    {
+      "caseId": "explicit-ask",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_1"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "reviewed-wrapper",
+      "wallSeconds": 23.4
+    },
+    {
+      "caseId": "explicit-evidence",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-check-evidence"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-check-evidence",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "reviewed-wrapper",
+      "wallSeconds": 38.3
+    },
+    {
+      "caseId": "explicit-lint",
+      "split": "development",
+      "repeat": 1,
+      "required": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-semantic-lint",
+        "ask-jev"
+      ],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [
+        "ask-jev",
+        "jev-semantic-lint"
+      ],
+      "verifiedLoads": [
+        {
+          "name": "ask-jev",
+          "eventId": "item_2"
+        },
+        {
+          "name": "jev-semantic-lint",
+          "eventId": "item_2"
+        }
+      ],
+      "jevResponseCount": 1,
+      "jevInvocation": "direct",
+      "wallSeconds": 61.3
+    },
+    {
+      "caseId": "list-files",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 7.7
+    },
+    {
+      "caseId": "literal-edit",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 26.2
+    },
+    {
+      "caseId": "read-exit-code",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 6.4
+    },
+    {
+      "caseId": "calculate-total",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 7.4
+    },
+    {
+      "caseId": "quoted-name",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 10.2
+    },
+    {
+      "caseId": "explain-code",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 12.4
+    },
+    {
+      "caseId": "decline-provider",
+      "split": "development",
+      "repeat": 1,
+      "required": [],
+      "allowed": [],
+      "status": "completed",
+      "routePass": true,
+      "verifiedLoadedNames": [],
+      "verifiedLoads": [],
+      "jevResponseCount": 0,
+      "jevInvocation": null,
+      "wallSeconds": 9
+    }
+  ]
+}
