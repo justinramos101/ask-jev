@@ -1,24 +1,36 @@
 ---
 name: ask-jev
 description: >
-  Use Jev whenever a task or feature needs semantic understanding or programmable
-  common sense over text, evidence, or application state. Covers all TypeSafe/System
-  One use cases: selecting next steps; classification and routing; tool/function
-  arguments; extraction and structure recovery; semantic search, retrieval, and
-  ranking; entity matching; reusable scores and ML features; verification,
-  guardrails, and escalation; interactive or changing-state decisions. Also invoke
-  when brainstorming AI features, designing these workflows, or replacing LLM
-  prompt-and-parse with typed decisions, and when the user asks to consult Jev.
-  These examples are not limits; compose focused questions for new use cases.
-  Gather context as needed. Skip only steps fully resolved by deterministic rules,
-  calculations, exact lookups, or directly observed command results.
+  Use Jev by default for semantic judgments that inform a task and return typed
+  selections, labels, yes/no checks, or scores. Covers all TypeSafe/System One use
+  cases: choosing actions; routing and function arguments; extraction and structure
+  recovery; search, retrieval, ranking, and entity matching; reusable scores and ML
+  features; verification, guardrails, and escalation; interactive state. Use during
+  AI-feature brainstorming, workflow design, and prompt-and-parse replacement, and
+  when the user asks to consult Jev. These examples are not limits. Gather context
+  and frame questions yourself. Skip operations that only gather evidence, execute
+  chosen actions, or generate free-form content; use Jev for semantic decisions in
+  the surrounding workflow. Also skip fully deterministic answers, still-valid
+  results needing no fresh check, user opt-outs, or context that cannot be shared
+  with an authorized provider. Simplicity and confidence are not exceptions.
 ---
 
 # Ask Jev
 
 Use this skill for the semantic judgments in any use case covered by `typesafe-ai`, including combinations beyond its examples. A judgment can interpret language or application state, detect a property, select an option, or rate a dimension. It need not be an evidence audit or a choice between implementation approaches. Gather the relevant context yourself when it is not already supplied; the user does not need to name Jev or prepare a request.
 
-Keep known rules, calculations, exact lookups, and execution in code or tools. This boundary applies to individual steps: a parser can find candidate values while Jev selects the intended one. You supply the state, alternatives, and criteria, interpret the answers, and carry out the next step.
+You supply the state, alternatives, and criteria, interpret the answers, and carry out the next step.
+
+## Apply the call boundaries
+
+Use Jev by default for semantic judgments that inform the task. Skip a fresh call only when:
+
+- A deterministic rule, calculation, exact lookup, or direct observation fully answers the question.
+- The operation only gathers evidence, executes an already chosen action, or generates free-form content. Use Jev for semantic decisions within the surrounding workflow, such as selecting a title against an audience's needs or checking a claim against its source. Do not invent selections or scores solely to route free-form generation through Jev.
+- A still-valid Jev result answers the same question over unchanged state, options, and criteria, and no fresh verification is needed.
+- The user disallows Jev, or necessary context cannot be shared with an authorized provider.
+
+Apply these exceptions directly; do not recursively ask Jev whether to call Jev. Task simplicity and confidence in your own answer are not exceptions. The boundaries apply to individual steps: a parser can find candidate values while Jev selects the intended one. Keep known rules, calculations, exact lookups, and execution in code or tools.
 
 ## Recognize the use case
 

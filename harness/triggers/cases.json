@@ -114,6 +114,32 @@
       "allowed": ["ask-jev"]
     },
     {
+      "id": "freeform-story",
+      "split": "development",
+      "prompt": "Write a short whimsical scene about a lighthouse keeper who discovers a tiny orchestra inside a seashell.",
+      "files": {},
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "freeform-note",
+      "split": "development",
+      "prompt": "Write a friendly thank-you note to a neighbor for watering my plants while I was away.",
+      "files": {},
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "writing-selection",
+      "split": "development",
+      "prompt": "Read article.json and choose which proposed title best fits the article's audience and purpose. Explain the choice briefly.",
+      "files": {
+        "article.json": "{\"audience\":\"Curious children and their parents trying stargazing for the first time\",\"purpose\":\"Help families enjoy finding familiar shapes in the night sky from their backyard without buying equipment\",\"titles\":[\"A Taxonomy of Observable Celestial Objects\",\"Your First Night-Sky Adventure Starts in the Backyard\",\"The Essential Telescope Buying Guide\"]}\n"
+      },
+      "required": ["ask-jev"],
+      "allowed": ["ask-jev"]
+    },
+    {
       "id": "completion-audit",
       "split": "development",
       "prompt": "Audit report.md against records.md. Which claims are supported, contradicted, or still unverified? Preserve the distinction between missing evidence and false claims.",
