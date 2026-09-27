@@ -2,6 +2,8 @@
 
 Use this benchmark to compare agent runs with and without `ask-jev` on file-discovery tasks. See the [benchmark reference](reference.md) for measurements and their limits.
 
+For activation and non-activation coverage across all repository skills, use the [trigger suite](triggers/README.md).
+
 ## Prepare the tools
 
 Install Node.js 18 or later, Git, Bun, and the agent CLIs you plan to test. Authenticate `claude`, `codex`, or both before the run.

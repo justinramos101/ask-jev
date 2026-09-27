@@ -35,7 +35,7 @@ Check that every command succeeds. Both Gitleaks scans exit with code 1 if they 
 
 If you change request fields or CLI behavior, update the matching reference under `skills/ask-jev/references/`. Keep the skill directory self-contained because installation copies that directory.
 
-For agent behavior comparisons, follow the [benchmark guide](harness/README.md). Benchmark runs make paid API calls and are separate from the offline tests.
+For agent behavior comparisons, follow the [benchmark guide](harness/README.md). To check when each skill activates or stays unused, run the [trigger suite](harness/triggers/README.md). Both make paid API calls and are separate from the offline tests.
 
 ## Submit a pull request
 
