@@ -11,7 +11,7 @@ Check bounded passages against explicit rules. Return findings that cite the rul
 
 Locate the installed `ask-jev` skill through the host's skill catalog. Read its `SKILL.md` and `references/request.md`. Follow its provider, data-sharing, and failure instructions. Resolve the runner from that skill's directory. Do not assume sibling directories survive installation.
 
-If the dependency or credentials are unavailable, report the limitation and inspect the text directly. Do not claim Jev ran. Check credentials in the same shell and working-directory context as the command without printing their values.
+If the dependency is missing or the call fails, report the limitation and inspect the text directly. Do not claim Jev ran.
 
 ## Define the check
 

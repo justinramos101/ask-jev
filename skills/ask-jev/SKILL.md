@@ -22,7 +22,7 @@ Keep factual observations in `state` and judgment instructions in `questions`. N
 
 Send only context you are allowed to share with the selected provider. Requests leave your machine without secret redaction. For file ranking, check that candidate paths and excerpts contain no credentials or private material you cannot share.
 
-Use Node.js 18 or later. Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment before you call the script. If both exist, the TypeSafe key takes precedence. To select a provider explicitly, pass `--provider typesafe` or `--provider vercel`.
+Use Node.js 18 or later. The runner handles provider selection and credentials. Do not check the environment for keys. Run the command, and read its error message if it fails.
 
 Write a JSON file with `state` and a nonempty `questions` map. Put the question text in `instructions` and the options or rubric in `criteria`. Use a string, object, or array for `state`. Read [the request reference](references/request.md) for all three question types, or adapt [the mixed decision example](examples/decision.json).
 
@@ -48,7 +48,7 @@ Read the JSON on stdout. Each answer appears under the question ID in `answers`.
 
 Treat the result as evidence for the decision. Confidence does not guarantee correctness. If evidence is missing or answers conflict, gather the missing facts or revise an ambiguous question. Do not repeatedly ask the same question until it agrees with your preference. Use thresholds appropriate to the consequence of a wrong answer, rather than one cutoff for every task.
 
-Keep action execution in the calling agent. A selected option does not grant permission to perform it. If Jev fails or credentials are unavailable, report that limitation and continue with direct investigation or your own reasoning. Do not claim Jev evaluated a decision when the call failed.
+Keep action execution in the calling agent. A selected option does not grant permission to perform it. If the command fails, report its error message and continue with direct investigation or your own reasoning. Do not claim Jev evaluated a decision when the call failed.
 
 ## Rank candidate files
 

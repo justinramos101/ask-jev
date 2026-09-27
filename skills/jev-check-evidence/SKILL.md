@@ -11,7 +11,7 @@ Audit claims before presenting a report or when the user asks whether a report i
 
 Locate the installed `ask-jev` skill through the host's skill catalog. Read its `SKILL.md` and `references/request.md`. Follow its provider, data-sharing, and failure instructions. Resolve the runner from that skill's directory, not from this skill's parent directory.
 
-If `ask-jev` is missing, explain the dependency and inspect the evidence directly. Do not install packages or invent a runner path. If credentials are missing or a call fails, report that Jev did not evaluate the claims.
+If `ask-jev` is missing, explain the dependency and inspect the evidence directly. Do not install packages or invent a runner path. If the call fails, report that Jev did not evaluate the claims.
 
 ## Gather evidence
 

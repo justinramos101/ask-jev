@@ -207,7 +207,7 @@ test('auto provider prefers the TypeSafe key, then the gateway key', async () =>
     ['https://ai-gateway.vercel.sh/typesafe/v1/systemone', 'typesafe-ai/jev', 'Bearer gw-key'],
   );
   assert.equal(none.code, 2);
-  assert.equal(none.stderr.split('\n')[0], 'ask-jev: set TYPESAFE_API_KEY or AI_GATEWAY_API_KEY');
+  assert.equal(none.stderr.split('\n')[0], 'ask-jev: no API key, so Jev was not called. Set TYPESAFE_API_KEY or AI_GATEWAY_API_KEY in the environment that starts the agent.');
 });
 
 test('refuses more than 300 candidates and asks to narrow', async () => {
