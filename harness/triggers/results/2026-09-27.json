@@ -1,0 +1,95 @@
+{
+  "date": "2026-09-27",
+  "collectorCommit": "3b0504ba697d063a2a2eac8cee6561f66f1608e0",
+  "collectorHash": "ee054ebf1cbbae9d3b5c843fcb87d10cbac31f677988a3e81b5079584e2af1b6",
+  "caseHash": "b21a3c30c74ed58591666175fddb5a5bedc0b114336d3b2ec4ec912d9b2fb2d2",
+  "skillSourceCommit": "c94abf5d0edfde53da78a0114fcfe2537f4253b0",
+  "requestedModel": "gpt-6-astra",
+  "requestedEffort": "medium",
+  "observedAgentModel": null,
+  "codexVersion": "codex-cli 0.157.1",
+  "skillHashes": {
+    "ask-jev": {
+      "directory": "2a7f3808763831200f8e605f60abe8c14d91cb00d3334fcabfb0faa582d57245",
+      "document": "88158c31d674b397dbb9d62c87a7bfe8458d6c420882f137574060b186d041a1"
+    },
+    "jev-check-evidence": {
+      "directory": "9a9ccb54bb911e375dca48bcd8098a3bbbb8245e7caa77f4479b682cb3a0266e",
+      "document": "8e94233c6383a5b4b110a9da809c16b761d4affc79196ea3564678866eb8b9f3"
+    },
+    "jev-semantic-lint": {
+      "directory": "48f8280d19253accbb088990798dfe382d5e72b19be10b0d4b3cc468bab280d9",
+      "document": "5838f3219396001089e33a7e36e3989c151d9cdc901ac2dc72f5b20e55a7b4e6"
+    }
+  },
+  "summary": {
+    "total": 29,
+    "completed": 29,
+    "routePassed": 29,
+    "completionRate": 1,
+    "perSkill": {
+      "ask-jev": {
+        "positives": {
+          "passed": 16,
+          "total": 16
+        },
+        "negatives": {
+          "passed": 13,
+          "total": 13
+        }
+      },
+      "jev-check-evidence": {
+        "positives": {
+          "passed": 6,
+          "total": 6
+        },
+        "negatives": {
+          "passed": 23,
+          "total": 23
+        }
+      },
+      "jev-semantic-lint": {
+        "positives": {
+          "passed": 6,
+          "total": 6
+        },
+        "negatives": {
+          "passed": 23,
+          "total": 23
+        }
+      }
+    },
+    "failureStatuses": {}
+  },
+  "runs": [
+    {"partition":"dev-a","caseId":"incident-choice","split":"development","repeat":1,"required":["ask-jev"],"allowed":["ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"}],"jevResponses":[{"eventId":"item_5","exitCode":0,"model":"typesafe-ai/jev","answerCount":1,"invocation":"direct"}],"wallSeconds":23.6},
+    {"partition":"dev-a","caseId":"approach-ranking","split":"development","repeat":1,"required":["ask-jev"],"allowed":["ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"}],"jevResponses":[{"eventId":"item_6","exitCode":0,"model":"typesafe-ai/jev","answerCount":3,"invocation":"reviewed-wrapper"}],"wallSeconds":34.8},
+    {"partition":"dev-a","caseId":"completion-audit","split":"development","repeat":1,"required":["jev-check-evidence","ask-jev"],"allowed":["jev-check-evidence","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-check-evidence"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-check-evidence","eventId":"item_2"}],"jevResponses":[{"eventId":"item_5","exitCode":0,"model":"typesafe-ai/jev","answerCount":8,"invocation":"reviewed-wrapper"}],"wallSeconds":45.6},
+    {"partition":"dev-a","caseId":"summary-audit","split":"development","repeat":1,"required":["jev-check-evidence","ask-jev"],"allowed":["jev-check-evidence","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-check-evidence"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-check-evidence","eventId":"item_2"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":4,"invocation":"reviewed-wrapper"}],"wallSeconds":42.3},
+    {"partition":"dev-a","caseId":"instruction-rules","split":"development","repeat":1,"required":["jev-semantic-lint","ask-jev"],"allowed":["jev-semantic-lint","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-semantic-lint"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-semantic-lint","eventId":"item_2"}],"jevResponses":[{"eventId":"item_5","exitCode":0,"model":"typesafe-ai/jev","answerCount":2,"invocation":"direct"}],"wallSeconds":43.1},
+    {"partition":"dev-a","caseId":"rubric-review","split":"development","repeat":1,"required":["jev-semantic-lint","ask-jev"],"allowed":["jev-semantic-lint","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-semantic-lint"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_1"},{"name":"jev-semantic-lint","eventId":"item_1"}],"jevResponses":[{"eventId":"item_3","exitCode":0,"model":"typesafe-ai/jev","answerCount":2,"invocation":"reviewed-wrapper"},{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":1,"invocation":"reviewed-wrapper"}],"wallSeconds":47.2},
+    {"partition":"dev-b","caseId":"combined-audit","split":"development","repeat":1,"required":["ask-jev","jev-check-evidence","jev-semantic-lint"],"allowed":["ask-jev","jev-check-evidence","jev-semantic-lint"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-check-evidence","jev-semantic-lint"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-check-evidence","eventId":"item_2"},{"name":"jev-semantic-lint","eventId":"item_2"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":8,"invocation":"reviewed-wrapper"},{"eventId":"item_5","exitCode":0,"model":"typesafe-ai/jev","answerCount":2,"invocation":"direct"}],"wallSeconds":52.6},
+    {"partition":"dev-b","caseId":"explicit-ask","split":"development","repeat":1,"required":["ask-jev"],"allowed":["ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_1"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":1,"invocation":"direct"}],"wallSeconds":24.3},
+    {"partition":"dev-b","caseId":"explicit-evidence","split":"development","repeat":1,"required":["jev-check-evidence","ask-jev"],"allowed":["jev-check-evidence","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-check-evidence"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_1"},{"name":"jev-check-evidence","eventId":"item_1"}],"jevResponses":[{"eventId":"item_3","exitCode":0,"model":"typesafe-ai/jev","answerCount":8,"invocation":"reviewed-wrapper"}],"wallSeconds":34},
+    {"partition":"dev-b","caseId":"explicit-lint","split":"development","repeat":1,"required":["jev-semantic-lint","ask-jev"],"allowed":["jev-semantic-lint","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-semantic-lint"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-semantic-lint","eventId":"item_2"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":2,"invocation":"reviewed-wrapper"}],"wallSeconds":47.5},
+    {"partition":"dev-b","caseId":"list-files","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":8.3},
+    {"partition":"dev-b","caseId":"literal-edit","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":13.6},
+    {"partition":"dev-c","caseId":"read-exit-code","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":9.3},
+    {"partition":"dev-c","caseId":"calculate-total","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":7.1},
+    {"partition":"dev-c","caseId":"quoted-name","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":6.6},
+    {"partition":"dev-c","caseId":"explain-code","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":16.3},
+    {"partition":"dev-c","caseId":"decline-provider","split":"development","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":10.5},
+    {"partition":"holdout-a","caseId":"support-triage","split":"holdout","repeat":1,"required":["ask-jev"],"allowed":["ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_1"}],"jevResponses":[{"eventId":"item_3","exitCode":0,"model":"typesafe-ai/jev","answerCount":1,"invocation":"direct"}],"wallSeconds":23.3},
+    {"partition":"holdout-a","caseId":"support-triage","split":"holdout","repeat":2,"required":["ask-jev"],"allowed":["ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_1"}],"jevResponses":[{"eventId":"item_3","exitCode":0,"model":"typesafe-ai/jev","answerCount":1,"invocation":"direct"}],"wallSeconds":20.8},
+    {"partition":"holdout-a","caseId":"release-claims","split":"holdout","repeat":1,"required":["jev-check-evidence","ask-jev"],"allowed":["jev-check-evidence","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-check-evidence"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-check-evidence","eventId":"item_2"}],"jevResponses":[{"eventId":"item_5","exitCode":0,"model":"typesafe-ai/jev","answerCount":4,"invocation":"reviewed-wrapper"}],"wallSeconds":41.5},
+    {"partition":"holdout-a","caseId":"release-claims","split":"holdout","repeat":2,"required":["jev-check-evidence","ask-jev"],"allowed":["jev-check-evidence","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-check-evidence"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_1"},{"name":"jev-check-evidence","eventId":"item_1"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":4,"invocation":"reviewed-result-file"}],"wallSeconds":22.9},
+    {"partition":"holdout-a","caseId":"agent-handoff","split":"holdout","repeat":1,"required":["jev-semantic-lint","ask-jev"],"allowed":["jev-semantic-lint","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-semantic-lint"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-semantic-lint","eventId":"item_2"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":2,"invocation":"reviewed-wrapper"}],"wallSeconds":35.4},
+    {"partition":"holdout-a","caseId":"agent-handoff","split":"holdout","repeat":2,"required":["jev-semantic-lint","ask-jev"],"allowed":["jev-semantic-lint","ask-jev"],"status":"completed","routePass":true,"verifiedLoadedNames":["ask-jev","jev-semantic-lint"],"verifiedLoads":[{"name":"ask-jev","eventId":"item_2"},{"name":"jev-semantic-lint","eventId":"item_2"}],"jevResponses":[{"eventId":"item_4","exitCode":0,"model":"typesafe-ai/jev","answerCount":2,"invocation":"reviewed-wrapper"}],"wallSeconds":34.6},
+    {"partition":"holdout-b","caseId":"extract-title","split":"holdout","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":6.8},
+    {"partition":"holdout-b","caseId":"extract-title","split":"holdout","repeat":2,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":8.5},
+    {"partition":"holdout-b","caseId":"translate-quoted-rule","split":"holdout","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":7.1},
+    {"partition":"holdout-b","caseId":"translate-quoted-rule","split":"holdout","repeat":2,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":8.9},
+    {"partition":"holdout-b","caseId":"rename-heading","split":"holdout","repeat":1,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":22.4},
+    {"partition":"holdout-b","caseId":"rename-heading","split":"holdout","repeat":2,"required":[],"allowed":[],"status":"completed","routePass":true,"verifiedLoadedNames":[],"verifiedLoads":[],"jevResponses":[],"wallSeconds":16.5}
+  ]
+}

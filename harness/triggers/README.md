@@ -4,6 +4,8 @@ Run native Codex tasks to measure whether the agent loads the intended Jev skill
 
 A successful trigger requires observable exposure to the installed skill body. Mentioning the skill in an answer or naming its runner in a command is not enough.
 
+The [recorded live run](results/2026-09-27.md) covers 29 trials across 23 cases.
+
 ## Run the suite
 
 Install and authenticate the Codex CLI. Configure a Jev provider key in the shell that starts this command. The suite makes real Codex and Jev calls, so runs incur usage costs. It uses the production skills and runner without stubs.
@@ -46,7 +48,7 @@ The execution uses `codex exec --json --ephemeral --ignore-user-config` with a w
 
 The installed CLI's command events do not expose structured read paths. The collector therefore requires a completed successful read command with an exact installed skill path and output containing that skill's complete expected body. It records the event as evidence. Truncated, failed, unsupported, and unresolved reads are not credited. This conservative rule can leave a genuine partial load unverified. Inspect those events instead of treating them as proof that a skill was never considered.
 
-Runner-command attempts and exit statuses are separate diagnostics. Shell success alone does not prove a Jev response, correct judgment, or useful final answer. A dependency read also does not establish that the agent selected it as a separate primary workflow.
+Runner-command attempts and exit statuses are separate diagnostics. Only recognized shell invocations count as automatic runner attempts. Inspect wrapper commands and redirected result files in the raw events. Shell success alone does not prove a Jev response, correct judgment, or useful final answer. A dependency read also does not establish that the agent selected it as a separate primary workflow.
 
 ## Interpret results
 
