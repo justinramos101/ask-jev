@@ -68,6 +68,23 @@
       ]
     },
     {
+      "id": "requirements-done",
+      "split": "development",
+      "prompt": "Read issue.md and records.md. Does the work meet every requirement in the issue? Tell me what is still missing before I close it.",
+      "files": {
+        "issue.md": "Issue #60: upload reliability. Acceptance criteria: 1. Show upload progress. 2. Retry failed uploads at most three times. 3. Report the final failure to the user.",
+        "records.md": "Target revision: r3. Worker report: \"Upload progress is shown and failures are reported. Done.\" Test run at r3, exit code 0: PASS upload succeeds on the first attempt; PASS upload reports progress. These are the only tests in the run. No retry or failure-reporting check is supplied."
+      },
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ]
+    },
+    {
       "id": "instruction-rules",
       "split": "development",
       "prompt": "Check guide.md against policy.md for contradictory or ambiguous instructions. Cite each defect and suggest the smallest correction. Do not edit files.",
@@ -262,6 +279,23 @@
       "files": {
         "release.md": "The migration is fully verified and safe across all supported database engines.",
         "evidence.md": "The patch adds migration code for PostgreSQL and SQLite. The supplied run log shows a PostgreSQL check passed. SQLite was not exercised. No data-preservation check is supplied."
+      },
+      "required": [
+        "jev-check-evidence",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-check-evidence",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "acceptance-check",
+      "split": "holdout",
+      "prompt": "Check the branch described in evidence.md against the acceptance criteria in ticket.md. Which criteria are met, which are not, and which are unverified?",
+      "files": {
+        "ticket.md": "Acceptance criteria: A1. `config load` exits with code 2 when the config file is missing. A2. Config files load in JSON and YAML formats. A3. `export --dry-run` writes no files.",
+        "evidence.md": "Revision r3. Test run, exit code 0: PASS config load exits with code 2 when the config file is missing; PASS loads a JSON config file. The diff adds a --dry-run option to the export parser with help text saying it writes no files. No YAML or dry-run execution record is supplied."
       },
       "required": [
         "jev-check-evidence",
