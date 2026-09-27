@@ -56,6 +56,22 @@ Ask your agent:
 
 The [evidence-checking skill](skills/jev-check-evidence/SKILL.md) asks separate questions about support and contradiction. The agent inspects the original sources before retaining or correcting a claim. The [evaluation fixtures](skills/jev-check-evidence/evaluation/README.md) cover missing evidence, partial coverage, stale revisions, conflicting records, and instructions embedded in source text. They do not establish judgment quality without live evaluation.
 
+## Lint documentation and agent instructions
+
+Install `jev-semantic-lint` alongside `ask-jev` to check prose against explicit rules:
+
+```sh
+npx skills add justinramos101/ask-jev --skill jev-semantic-lint
+```
+
+For manual installation, copy the complete `skills/jev-semantic-lint` directory into the same agent skills directory as `ask-jev`.
+
+Ask your agent:
+
+> Use jev-semantic-lint to inspect these agent instructions for contradictory directions and ambiguous inputs. Preserve explicit exceptions. Cite each finding and propose the smallest correction.
+
+The [semantic lint skill](skills/jev-semantic-lint/SKILL.md) distinguishes violations, compliance, inapplicable rules, and missing evidence. Its [workflow recipes](skills/jev-semantic-lint/references/workflows.md) cover skill authoring, agent failure analysis, eval rubric review, and artifact grading. Failure explanations remain hypotheses without discriminating evidence. Grading uses the supplied rubric rather than invented criteria.
+
 ## Set an API key
 
 Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment that starts your agent. Keep the key out of request files.

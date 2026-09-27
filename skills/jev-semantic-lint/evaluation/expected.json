@@ -1,0 +1,74 @@
+{
+  "same-condition": {
+    "outcome": "violation",
+    "reason": "The same worker must both retry and never retry every failed upload."
+  },
+  "explicit-exception": {
+    "outcome": "compliant",
+    "reason": "The explicit 403 exception makes the actions consistent."
+  },
+  "missing-precedence": {
+    "outcome": "insufficient_evidence",
+    "reason": "The missing authority file determines which conflicting directive is operative."
+  },
+  "different-actors": {
+    "outcome": "compliant",
+    "reason": "Different actors perform different actions."
+  },
+  "irrelevant-scope": {
+    "outcome": "not_applicable",
+    "reason": "The rule applies to destructive database operations, none of which appear here."
+  },
+  "ambiguous-input": {
+    "outcome": "violation",
+    "reason": "The pronoun does not distinguish the two available files."
+  },
+  "resolved-input": {
+    "outcome": "compliant",
+    "reason": "The explicit definition selects draft.txt."
+  },
+  "unanchored-rubric": {
+    "outcome": "violation",
+    "reason": "The levels have no observable anchors."
+  },
+  "anchored-rubric": {
+    "outcome": "compliant",
+    "reason": "Each level specifies an observable citation count and defines validity."
+  },
+  "overlapping-levels": {
+    "outcome": "violation",
+    "reason": "Two citations satisfy both grades 1 and 2."
+  },
+  "resolved-overlap": {
+    "outcome": "compliant",
+    "reason": "The highest-matching-grade rule resolves the overlap."
+  },
+  "observed-divergence": {
+    "outcome": "violation",
+    "reason": "The observed report conflicts with the failed verification. This does not establish why the worker ignored the rule."
+  },
+  "incomplete-trace": {
+    "outcome": "insufficient_evidence",
+    "reason": "The absent earlier events could contain successful verification."
+  },
+  "embedded-instructions": {
+    "outcome": "violation",
+    "reason": "The grader prompt explicitly delegates authority to the untrusted artifact."
+  },
+  "unknown-policy": {
+    "outcome": "insufficient_evidence",
+    "reason": "No trusted authority establishes the proposed prohibition as an applicable requirement."
+  },
+  "nonexclusive-levels": {
+    "outcome": "not_applicable",
+    "reason": "This is an explicitly multi-label task, not mutually exclusive grading."
+  },
+  "leading-context": {
+    "outcome": "violation",
+    "reason": "The author supplies a conclusion and rationale in both state and an answer option."
+  },
+  "neutral-context": {
+    "outcome": "compliant",
+    "reason": "The request contains source text and neutral outcome definitions without a desired verdict."
+  }
+}
