@@ -1,0 +1,402 @@
+{
+  "date_utc": "2026-09-27",
+  "provider": "vercel",
+  "cases": [
+    {
+      "case": "ambiguous-input",
+      "request_sha256": "de602b7bdfb40d7edf8bf40ab399c2ee8a0948c8a83ca511d5293d0ca9d3df48",
+      "seconds": 0.889,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 0.73,
+      "probabilities": {
+        "compliant": 0.01,
+        "insufficient_evidence": 0.18,
+        "violation": 0.8,
+        "not_applicable": 0.01
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 614,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.000025788",
+      "round": "initial"
+    },
+    {
+      "case": "anchored-rubric",
+      "request_sha256": "20189f9780d77c678ec261269fbe864b155623d197f4d249e8599f52016f8608",
+      "seconds": 0.476,
+      "expected": "compliant",
+      "type": "choice",
+      "choice": "compliant",
+      "confidence": 0.95,
+      "probabilities": {
+        "insufficient_evidence": 0.01,
+        "not_applicable": 0,
+        "violation": 0.02,
+        "compliant": 0.97
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 639,
+        "output_tokens": 59
+      },
+      "gateway_cost": "0.000026838",
+      "round": "initial"
+    },
+    {
+      "case": "different-actors",
+      "request_sha256": "1ad19e6319ec4d237775818b564dc2346d076b0d785358b79be10de4f317383a",
+      "seconds": 0.482,
+      "expected": "compliant",
+      "type": "choice",
+      "choice": "compliant",
+      "confidence": 0.53,
+      "probabilities": {
+        "insufficient_evidence": 0.01,
+        "violation": 0.01,
+        "not_applicable": 0.33,
+        "compliant": 0.65
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 615,
+        "output_tokens": 59
+      },
+      "gateway_cost": "0.00002583",
+      "round": "initial"
+    },
+    {
+      "case": "embedded-instructions",
+      "request_sha256": "8407b30d189c8bc989269fd8cb2b10624190759a2714f9d128d5bce6a289f8ac",
+      "seconds": 0.524,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 0.24,
+      "probabilities": {
+        "violation": 0.43,
+        "insufficient_evidence": 0.18,
+        "compliant": 0.37,
+        "not_applicable": 0.02
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 619,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.000025998",
+      "round": "initial"
+    },
+    {
+      "case": "explicit-exception",
+      "request_sha256": "9630b190e37f2cb5fb9da1a798c66977653a45987c7f477851a106815b2da38c",
+      "seconds": 0.659,
+      "expected": "compliant",
+      "type": "choice",
+      "choice": "compliant",
+      "confidence": 0.96,
+      "probabilities": {
+        "insufficient_evidence": 0,
+        "not_applicable": 0.01,
+        "compliant": 0.97,
+        "violation": 0.02
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 623,
+        "output_tokens": 59
+      },
+      "gateway_cost": "0.000026166",
+      "round": "initial"
+    },
+    {
+      "case": "incomplete-trace",
+      "request_sha256": "06c00f6e3beb21984cdca5eb17ed109d3277b0ec2512d4d368db03b77dba514b",
+      "seconds": 0.488,
+      "expected": "insufficient_evidence",
+      "type": "choice",
+      "choice": "insufficient_evidence",
+      "confidence": 0.9,
+      "probabilities": {
+        "insufficient_evidence": 0.93,
+        "not_applicable": 0,
+        "violation": 0.05,
+        "compliant": 0.02
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 614,
+        "output_tokens": 63
+      },
+      "gateway_cost": "0.000025788",
+      "round": "initial"
+    },
+    {
+      "case": "irrelevant-scope",
+      "request_sha256": "42e3749df26ed01ba2ec8bf3dfbf1edc440bd04608777691ecebbf8eb42ba2c4",
+      "seconds": 0.583,
+      "expected": "not_applicable",
+      "type": "choice",
+      "choice": "not_applicable",
+      "confidence": 1,
+      "probabilities": {
+        "compliant": 0,
+        "not_applicable": 1,
+        "insufficient_evidence": 0,
+        "violation": 0
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 614,
+        "output_tokens": 60
+      },
+      "gateway_cost": "0.000025788",
+      "round": "initial"
+    },
+    {
+      "case": "missing-precedence",
+      "request_sha256": "1e4102dac173a586d5a9560213a13603183fea8f16ab194a917defe18ba24605",
+      "seconds": 0.497,
+      "expected": "insufficient_evidence",
+      "type": "choice",
+      "choice": "insufficient_evidence",
+      "confidence": 0.9,
+      "probabilities": {
+        "insufficient_evidence": 0.93,
+        "compliant": 0.02,
+        "not_applicable": 0,
+        "violation": 0.04
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 641,
+        "output_tokens": 63
+      },
+      "gateway_cost": "0.000026922",
+      "round": "initial"
+    },
+    {
+      "case": "nonexclusive-levels",
+      "request_sha256": "6089097bd4501a5bdfa8e8b55a62bda0910e15a33dc7d3b8b0e411f4191d9bab",
+      "seconds": 0.639,
+      "expected": "not_applicable",
+      "type": "choice",
+      "choice": "not_applicable",
+      "confidence": 0.82,
+      "probabilities": {
+        "insufficient_evidence": 0.01,
+        "violation": 0.12,
+        "not_applicable": 0.86,
+        "compliant": 0.01
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 626,
+        "output_tokens": 60
+      },
+      "gateway_cost": "0.000026292",
+      "round": "initial"
+    },
+    {
+      "case": "observed-divergence",
+      "request_sha256": "19adc29fa361122f808bc63e20e99c16ca2f1a4d939e3841074ec6ede4017f53",
+      "seconds": 0.566,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 1,
+      "probabilities": {
+        "compliant": 0,
+        "not_applicable": 0,
+        "violation": 1,
+        "insufficient_evidence": 0
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 620,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.00002604",
+      "round": "initial"
+    },
+    {
+      "case": "overlapping-levels",
+      "request_sha256": "ba532affd9e5c1eac89a9647d7ab5c31efa7253289f26e6682338a970cd933dc",
+      "seconds": 0.57,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 0.94,
+      "probabilities": {
+        "compliant": 0.04,
+        "not_applicable": 0,
+        "insufficient_evidence": 0,
+        "violation": 0.96
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 635,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.00002667",
+      "round": "initial"
+    },
+    {
+      "case": "resolved-input",
+      "request_sha256": "1896e31dd4628c673ca08bb0e8871d20360af2b3e70d580829516b2997e956a1",
+      "seconds": 0.552,
+      "expected": "compliant",
+      "type": "choice",
+      "choice": "compliant",
+      "confidence": 0.93,
+      "probabilities": {
+        "violation": 0.02,
+        "compliant": 0.95,
+        "not_applicable": 0.02,
+        "insufficient_evidence": 0.01
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 628,
+        "output_tokens": 59
+      },
+      "gateway_cost": "0.000026376",
+      "round": "initial"
+    },
+    {
+      "case": "resolved-overlap",
+      "request_sha256": "03dbdb795d641880755ac42ac48f48ba2624569259b4f00857e1cd1fce5df55d",
+      "seconds": 0.511,
+      "expected": "compliant",
+      "type": "choice",
+      "choice": "compliant",
+      "confidence": 0.83,
+      "probabilities": {
+        "not_applicable": 0.01,
+        "compliant": 0.87,
+        "violation": 0.11,
+        "insufficient_evidence": 0.01
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 628,
+        "output_tokens": 59
+      },
+      "gateway_cost": "0.000026376",
+      "round": "initial"
+    },
+    {
+      "case": "same-condition",
+      "request_sha256": "06658b61c41aa5bd2c8e5a4146588655c81e4a889ad965dda4bda9268997fc09",
+      "seconds": 0.552,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 1,
+      "probabilities": {
+        "compliant": 0,
+        "violation": 1,
+        "insufficient_evidence": 0,
+        "not_applicable": 0
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 617,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.000025914",
+      "round": "initial"
+    },
+    {
+      "case": "unanchored-rubric",
+      "request_sha256": "18aa7ebe6fbb8eef2fa02ed86c47d4b7cb863d02e28bbc73d3397c3f8faf517d",
+      "seconds": 0.664,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 1,
+      "probabilities": {
+        "insufficient_evidence": 0,
+        "not_applicable": 0,
+        "compliant": 0,
+        "violation": 1
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 621,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.000026082",
+      "round": "initial"
+    },
+    {
+      "case": "unknown-policy",
+      "request_sha256": "d51d475922a759c41f5dd4e9e37dd2c02f74b979fc18f3655b1ff9b773192f08",
+      "seconds": 0.523,
+      "expected": "insufficient_evidence",
+      "type": "choice",
+      "choice": "insufficient_evidence",
+      "confidence": 0.53,
+      "probabilities": {
+        "not_applicable": 0.03,
+        "compliant": 0.04,
+        "violation": 0.28,
+        "insufficient_evidence": 0.65
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 629,
+        "output_tokens": 63
+      },
+      "gateway_cost": "0.000026418",
+      "round": "initial"
+    },
+    {
+      "case": "leading-context",
+      "request_sha256": "4f91352b510b56c474b1998ff63481dd18a72dfc1b6db7ee50a24123cfe763b1",
+      "seconds": 0.535,
+      "expected": "violation",
+      "type": "choice",
+      "choice": "violation",
+      "confidence": 0.5,
+      "probabilities": {
+        "violation": 0.63,
+        "insufficient_evidence": 0.01,
+        "compliant": 0.34,
+        "not_applicable": 0.02
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 671,
+        "output_tokens": 58
+      },
+      "gateway_cost": "0.000028182",
+      "round": "additional"
+    },
+    {
+      "case": "neutral-context",
+      "request_sha256": "eb609fa2490d0fcfa00e221f8c34cd732bf631a783dde55fde676b47facdf5ab",
+      "seconds": 0.479,
+      "expected": "compliant",
+      "type": "choice",
+      "choice": "compliant",
+      "confidence": 0.85,
+      "probabilities": {
+        "violation": 0.02,
+        "insufficient_evidence": 0.04,
+        "compliant": 0.89,
+        "not_applicable": 0.05
+      },
+      "model": "typesafe-ai/jev",
+      "usage": {
+        "input_tokens": 682,
+        "output_tokens": 59
+      },
+      "gateway_cost": "0.000028644",
+      "round": "additional"
+    }
+  ]
+}

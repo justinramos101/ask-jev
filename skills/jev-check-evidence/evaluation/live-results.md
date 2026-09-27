@@ -25,7 +25,7 @@ The revised questions ask whether at least one individual record supports or con
 | supported | 0.96 | 0.04 | supported | Yes |
 | unrelated-test | 0.04 | 0.10 | insufficient_evidence | Yes |
 
-The final twelve calls had no API errors. Mean CLI wall time was 0.493 seconds per request. Provider usage totaled 6,916 input tokens and 456 output tokens for that pass. These totals exclude the earlier passes and the initial connectivity call. The responses did not report monetary cost.
+The final twelve calls had no API errors. Mean CLI wall time was 0.493 seconds per request. Provider usage totaled 6,916 input tokens and 456 output tokens for that pass. These totals exclude the earlier passes and the initial connectivity call. The responses include a gateway `cost` field totaling `0.000290472` for this pass. The response does not specify its currency. The initial report overlooked this nested metadata.
 
 ## Limits and recommendation
 
