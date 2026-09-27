@@ -38,6 +38,7 @@ async function run(argv = ['ask', '-'], options = {}) {
     readInput: options.fromFile ? undefined : async () => options.input ?? JSON.stringify(request),
     fetch: async (url, init) => {
       requests.push({ url, ...init, body: JSON.parse(init.body) });
+      if (options.fetch) return options.fetch(url, init);
       if (options.retry && requests.length === 1) return new Response('', { status: 429, headers: { 'retry-after': '0.001' } });
       return new Response(options.rawResponse ?? JSON.stringify(options.response ?? response));
     },
@@ -65,12 +66,19 @@ test('file source is resolved from io.cwd and explicit gateway survives retry un
   const result = await run(['ask', 'input.json', '--provider', 'vercel'], { cwd, fromFile: true, retry: true });
   assert.equal(result.code, 0);
   assert.deepEqual(JSON.parse(result.stdout), response);
-  assert.equal(result.stderr, 'ask-jev: rate limited, waiting 1 s\n');
+  assert.match(result.stderr, /HTTP 429 via ai-gateway\.vercel\.sh/);
+  assert.match(result.stderr, /retry 1\/2 in 0\.001 s \(server Retry-After\)/);
   assert.deepEqual(result.sleeps, [1]);
   assert.equal(result.requests.length, 2);
-  assert.deepEqual(result.requests[0], result.requests[1]);
+  const { signal: firstSignal, ...firstRequest } = result.requests[0];
+  const { signal: secondSignal, ...secondRequest } = result.requests[1];
+  assert.deepEqual(firstRequest, secondRequest);
+  assert.ok(firstSignal instanceof AbortSignal);
+  assert.ok(secondSignal instanceof AbortSignal);
+  assert.notEqual(firstSignal, secondSignal);
   assert.equal(result.requests[0].url, 'https://ai-gateway.vercel.sh/typesafe/v1/systemone');
   assert.equal(result.requests[0].body.model, 'typesafe-ai/jev');
+  assert.deepEqual(result.requests[0].body.providerOptions, { gateway: { only: ['typesafe-ai'] } });
   assert.equal(result.requests[0].headers.authorization, 'Bearer gateway-key');
 });
 
@@ -81,6 +89,118 @@ test('string and array states and optional noul criteria are supported without m
     assert.equal(result.code, 0);
     assert.deepEqual(JSON.parse(result.stdout), { answers: { q: { type: 'noul', noul: 0 } } });
     assert.deepEqual(result.requests[0].body.state, state);
+  }
+});
+
+test('429 retries are bounded even when the server requests no wait', async () => {
+  for (const [flags, attempts, sleeps] of [
+    [[], 3, [1000, 2000]],
+    [['--max-retries', '0'], 1, []],
+    [['--max-retries', '5'], 6, [0, 0, 0, 0, 0]],
+  ]) {
+    const result = await run(['ask', '-', ...flags], {
+      fetch: async () => new Response('busy', {
+        status: 429, headers: attempts === 6 ? { 'retry-after': '0' } : {},
+      }),
+    });
+    assert.equal(result.code, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.requests.length, attempts);
+    assert.deepEqual(result.sleeps, sleeps);
+    assert.match(result.stderr, new RegExp(`stopped after ${attempts} attempt`));
+    if (!flags.length) assert.match(result.stderr, /local exponential backoff; no usable server retry timing/);
+  }
+});
+
+test('retry timing honors HTTP dates and falls back from unusable headers', async () => {
+  for (const [headers, delay, source] of [
+    [{ 'retry-after': 'Thu, 01 Jan 1970 00:00:07 GMT' }, 7000, 'server Retry-After date'],
+    [{ 'retry-after': 'Wed, 31 Dec 1969 23:59:59 GMT' }, 0, 'server Retry-After date'],
+    [{ 'retry-after': 'invalid', 'x-ratelimit-reset-requests': '2s' }, 2000, 'server x-ratelimit-reset-requests'],
+    [{ 'retry-after': '-1', 'x-ratelimit-reset-requests': 'invalid' }, 1000, 'local exponential backoff'],
+  ]) {
+    let attempts = 0;
+    const result = await run(undefined, {
+      fetch: async () => ++attempts === 1
+        ? new Response('busy', { status: 429, headers })
+        : new Response(JSON.stringify(response)),
+    });
+    assert.equal(result.code, 0, result.stderr);
+    assert.deepEqual(result.sleeps, [delay]);
+    assert.ok(result.stderr.includes(source));
+  }
+});
+
+test('invalid retry limits fail before sending a request', async () => {
+  for (const limit of ['-1', '6', '1.5', 'NaN', '', '1e0']) {
+    const result = await run(['ask', '-', `--max-retries=${limit}`]);
+    assert.equal(result.code, 2);
+    assert.equal(result.requests.length, 0);
+    assert.match(result.stderr, /--max-retries must be an integer from 0 to 5/);
+  }
+});
+
+test('HTTP diagnostics preserve useful metadata and redact credentials', async () => {
+  const result = await run(['ask', '-', '--provider', 'vercel', '--max-retries', '0'], {
+    fetch: async () => new Response(JSON.stringify({
+      error: { message: 'busy gateway-key Bearer another-secret\nnext line', type: 'upstream_limit' },
+      providerMetadata: { gateway: {
+        generationId: 'gen-123', routing: {
+          totalProviderAttemptCount: 1,
+          skippedProviderAttempts: [{ provider: 'typesafe-ai', reason: 'unavailable' }],
+        },
+      } },
+    }), { status: 429, headers: { 'x-request-id': 'req-123', 'x-ratelimit-remaining-requests': '0' } }),
+  });
+  assert.equal(result.code, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.requests.length, 1);
+  assert.doesNotMatch(result.stderr, /gateway-key|another-secret/);
+  for (const detail of ['[redacted]', 'error_type=upstream_limit', 'x-request-id=req-123',
+    'x-ratelimit-remaining-requests=0', 'generation_id=gen-123', 'provider_attempts=1',
+    'skipped_provider=typesafe-ai:unavailable']) assert.ok(result.stderr.includes(detail), detail);
+});
+
+test('other HTTP errors and network failures do not retry or leak credentials', async () => {
+  for (const fetch of [
+    async () => new Response('test-key ' + 'x'.repeat(5000), { status: 503 }),
+    async () => { throw new Error('connection failed test-key'); },
+  ]) {
+    const result = await run(undefined, { fetch });
+    assert.equal(result.code, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.requests.length, 1);
+    assert.deepEqual(result.sleeps, []);
+    assert.doesNotMatch(result.stderr, /test-key/);
+    assert.match(result.stderr, /\[redacted\]/);
+    assert.ok(result.stderr.length < 2200);
+  }
+});
+
+test('30-second timeout covers both fetch and response body consumption', async (t) => {
+  let controller;
+  t.mock.method(AbortSignal, 'timeout', (ms) => {
+    assert.equal(ms, 30000);
+    return controller.signal;
+  });
+  for (const stage of ['fetch', 'body']) {
+    controller = new AbortController();
+    const result = await run(undefined, {
+      fetch: async (_url, init) => {
+        assert.equal(init.signal, controller.signal);
+        const timeout = () => {
+          controller.abort();
+          throw new Error('aborted');
+        };
+        if (stage === 'fetch') return timeout();
+        return { text: async () => timeout() };
+      },
+    });
+    assert.equal(result.code, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.requests.length, 1);
+    assert.deepEqual(result.sleeps, []);
+    assert.match(result.stderr, /timed out after 30 s/);
   }
 });
 
