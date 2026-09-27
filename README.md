@@ -40,6 +40,22 @@ ln -s "$PWD/skills/ask-jev" ~/.agents/skills/ask-jev
 
 To install for one project, use that project's `.claude/skills` or `.agents/skills` directory instead. Keep the repository in place if you use a symlink.
 
+## Check evidence in agent reports
+
+Install the optional `jev-check-evidence` skill alongside `ask-jev` to audit claims in completion reports, PR descriptions, and research summaries:
+
+```sh
+npx skills add justinramos101/ask-jev --skill jev-check-evidence
+```
+
+For manual installation, copy the complete `skills/jev-check-evidence` directory into the same agent skills directory as `ask-jev`.
+
+Ask your agent:
+
+> Use jev-check-evidence to audit this completion report against the implementation and actual test output. Identify unsupported claims and the checks still needed.
+
+The [evidence-checking skill](skills/jev-check-evidence/SKILL.md) asks separate questions about support and contradiction. The agent inspects the original sources before retaining or correcting a claim. The [evaluation fixtures](skills/jev-check-evidence/evaluation/README.md) cover missing evidence, partial coverage, stale revisions, conflicting records, and instructions embedded in source text. They do not establish judgment quality without live evaluation.
+
 ## Set an API key
 
 Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment that starts your agent. Keep the key out of request files.
