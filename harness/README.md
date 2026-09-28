@@ -8,7 +8,7 @@ For activation and non-activation coverage across all repository skills, use the
 
 Install Node.js 18 or later, Git, Bun, and the agent CLIs you plan to test. Authenticate `claude`, `codex`, or both before the run.
 
-Set `AI_GATEWAY_API_KEY` in the environment. To test through Vercel, unset `TYPESAFE_API_KEY` because the agents inherit both variables and the runner prefers TypeSafe.
+Set `AI_GATEWAY_API_KEY` in the environment. To test through Vercel, unset `TYPESAFE_API_KEY` and `CLOUDFLARE_API_TOKEN` because the agents inherit the environment and the runner prefers TypeSafe, then Cloudflare.
 
 The benchmark makes paid agent and Jev calls. It runs Claude Code with `--dangerously-skip-permissions` and Codex with the `workspace-write` sandbox and network access. Run it in an environment where those permissions are acceptable.
 

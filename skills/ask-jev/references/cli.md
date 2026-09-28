@@ -7,8 +7,8 @@
 The runner accepts these commands:
 
 ```text
-node ask-jev.mjs ask <request.json|-> [--provider auto|typesafe|vercel] [--max-retries 0..5]
-node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] [--max-retries 0..5] <path|dir|glob>...
+node ask-jev.mjs ask <request.json|-> [--provider auto|typesafe|cloudflare|vercel] [--max-retries 0..5]
+node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|cloudflare|vercel] [--max-retries 0..5] <path|dir|glob>...
 node ask-jev.mjs --help
 ```
 
@@ -22,7 +22,7 @@ The runner accepts these options:
 
 | Option | Commands | Default | Values |
 | --- | --- | --- | --- |
-| `--provider` | `ask`, `files` | `auto` | `auto`, `typesafe`, or `vercel` |
+| `--provider` | `ask`, `files` | `auto` | `auto`, `typesafe`, `cloudflare`, or `vercel` |
 | `--max-retries` | `ask`, `files` | `2` | Integer from `0` to `5`; `0` sends one attempt |
 | `--goal` | `files` | Required | Nonempty text |
 | `--top` | `files` | `8` | Positive integer |
@@ -33,16 +33,19 @@ The runner accepts these options:
 
 The runner defines these providers:
 
-| Provider | Environment variable | Endpoint | Model |
+| Provider | Environment variables | Endpoint | Model |
 | --- | --- | --- | --- |
 | `typesafe` | `TYPESAFE_API_KEY` | `https://api.typesafe.ai/v1/systemone` | `jev-latest` |
+| `cloudflare` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | `https://api.cloudflare.com/client/v4/accounts/<account>/ai/run` | `typesafe/jev` |
 | `vercel` | `AI_GATEWAY_API_KEY` | `https://ai-gateway.vercel.sh/typesafe/v1/systemone` | `typesafe-ai/jev` |
 
-`auto` selects TypeSafe when `TYPESAFE_API_KEY` is nonempty. Otherwise, it selects Vercel when `AI_GATEWAY_API_KEY` is nonempty. An explicit provider requires that provider's key. A failed request does not cause a switch to the other provider.
+`auto` selects the first provider whose variables are all nonempty, in the order TypeSafe, Cloudflare, Vercel. An explicit provider requires all of that provider's variables. A failed request does not cause a switch to another provider.
 
-Vercel requests include `providerOptions.gateway.only: ["typesafe-ai"]`, restricting the upstream provider to TypeSafe. The model name `typesafe-ai/jev` alone does not select the hosting provider. This uses the [TypeSafe-compatible gateway endpoint](https://vercel.com/docs/ai-gateway/sdks-and-apis/typesafe) and Vercel's [provider restriction](https://vercel.com/docs/ai-gateway/models-and-providers/provider-filtering-and-ordering). The runner adds this transport setting; the caller still supplies only `state` and `questions`. Direct TypeSafe requests omit gateway options.
+Vercel requests include `providerOptions.gateway.only: ["typesafe-ai"]`, restricting the upstream provider to TypeSafe. The model name `typesafe-ai/jev` alone does not select the hosting provider. This uses the [TypeSafe-compatible gateway endpoint](https://vercel.com/docs/ai-gateway/sdks-and-apis/typesafe) and Vercel's [provider restriction](https://vercel.com/docs/ai-gateway/models-and-providers/provider-filtering-and-ordering). The runner adds this transport setting; the caller still supplies only `state` and `questions`. Direct TypeSafe and Cloudflare requests omit gateway options.
 
 The runner sends the request context and questions to the selected endpoint with the API key in an authorization header. Keys come from the environment, not the request JSON.
+
+Cloudflare Workers AI takes the request nested under `input` and returns it inside its REST envelope at `result.result`. The runner applies both conversions, so `ask` output has the same shape for every provider: `model`, `answers`, and `usage`.
 
 ## Output and exit codes
 

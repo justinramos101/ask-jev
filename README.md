@@ -80,9 +80,13 @@ The [semantic lint skill](skills/jev-semantic-lint/SKILL.md) distinguishes viola
 
 ## Set an API key
 
-Set `TYPESAFE_API_KEY` or `AI_GATEWAY_API_KEY` in the environment that starts your agent. Keep the key out of request files.
+Set one of these in the environment that starts your agent. Keep the keys out of request files.
 
-When both keys exist, the runner uses `TYPESAFE_API_KEY`. To select a provider explicitly, pass `--provider typesafe` or `--provider vercel`.
+- `TYPESAFE_API_KEY` for the TypeSafe API.
+- `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` for Jev on Cloudflare Workers AI.
+- `AI_GATEWAY_API_KEY` for the Vercel AI Gateway.
+
+When several are set, the runner uses them in that order. To select a provider explicitly, pass `--provider typesafe`, `--provider cloudflare`, or `--provider vercel`.
 
 See the [CLI reference](skills/ask-jev/references/cli.md) for provider endpoints, models, and exit codes.
 

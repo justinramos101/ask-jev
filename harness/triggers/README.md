@@ -64,4 +64,4 @@ A route passes only when the trial completes, every required skill is verified l
 
 Read the overall completion and exact-route results alongside per-skill positive and negative counts. Small synthetic suites can expose missed triggers and over-triggering. They do not establish calibrated reliability, task quality, or an improvement over a control agent.
 
-Raw logs redact the exact configured `TYPESAFE_API_KEY` and `AI_GATEWAY_API_KEY` values. Other private material can remain in tool output or local configuration errors. Inspect artifacts before sharing them.
+Raw logs redact the exact configured `TYPESAFE_API_KEY`, `CLOUDFLARE_API_TOKEN`, and `AI_GATEWAY_API_KEY` values. Other private material can remain in tool output or local configuration errors. Inspect artifacts before sharing them.

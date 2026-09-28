@@ -509,7 +509,7 @@ export function assessRun(outcome, telemetry, testCase) {
 
 export function redactSecrets(text, env = process.env) {
   let redacted = String(text);
-  for (const name of ['TYPESAFE_API_KEY', 'AI_GATEWAY_API_KEY']) {
+  for (const name of ['TYPESAFE_API_KEY', 'CLOUDFLARE_API_TOKEN', 'AI_GATEWAY_API_KEY']) {
     const value = env[name];
     if (value) redacted = redacted.replaceAll(value, `[redacted:${name}]`);
   }
