@@ -198,26 +198,66 @@ test('expands a quoted glob outside a git repo', async () => {
   assert.deepEqual(result.requests[0].body.state.files.map((file) => file.path).sort(), ['src/a.ts', 'src/deep/b.ts']);
 });
 
-test('auto provider prefers the TypeSafe key, then the gateway key', async () => {
+test('auto provider prefers the TypeSafe key, then Cloudflare, then the Vercel gateway key', async () => {
   const cwd = project({ 'a.ts': 'a' });
+  const cloudflare = { CLOUDFLARE_API_TOKEN: 'cf-token', CLOUDFLARE_ACCOUNT_ID: 'acct123' };
 
-  const both = await run(['files', '--goal', 'x', 'a.ts'], {
+  const all = await run(['files', '--goal', 'x', 'a.ts'], {
     cwd,
-    env: { TYPESAFE_API_KEY: 'ts-key', AI_GATEWAY_API_KEY: 'gw-key' },
+    env: { TYPESAFE_API_KEY: 'ts-key', AI_GATEWAY_API_KEY: 'gw-key', ...cloudflare },
   });
-  const gatewayOnly = await run(['files', '--goal', 'x', 'a.ts'], { cwd, env: { AI_GATEWAY_API_KEY: 'gw-key' } });
+  const cloudflareAndVercel = await run(['files', '--goal', 'x', 'a.ts'], { cwd, env: { AI_GATEWAY_API_KEY: 'gw-key', ...cloudflare } });
+  const vercelOnly = await run(['files', '--goal', 'x', 'a.ts'], { cwd, env: { AI_GATEWAY_API_KEY: 'gw-key' } });
+  const halfCloudflare = await run(['files', '--goal', 'x', 'a.ts'], { cwd, env: { AI_GATEWAY_API_KEY: 'gw-key', CLOUDFLARE_API_TOKEN: 'cf-token' } });
   const none = await run(['files', '--goal', 'x', 'a.ts'], { cwd, env: {} });
 
   assert.deepEqual(
-    [both.requests[0].url, both.requests[0].body.model, both.requests[0].headers.authorization],
+    [all.requests[0].url, all.requests[0].body.model, all.requests[0].headers.authorization],
     ['https://api.typesafe.ai/v1/systemone', 'jev-latest', 'Bearer ts-key'],
   );
   assert.deepEqual(
-    [gatewayOnly.requests[0].url, gatewayOnly.requests[0].body.model, gatewayOnly.requests[0].headers.authorization],
+    [cloudflareAndVercel.requests[0].url, cloudflareAndVercel.requests[0].body.model, cloudflareAndVercel.requests[0].headers.authorization],
+    ['https://api.cloudflare.com/client/v4/accounts/acct123/ai/run', 'typesafe/jev', 'Bearer cf-token'],
+  );
+  assert.deepEqual(
+    [vercelOnly.requests[0].url, vercelOnly.requests[0].body.model, vercelOnly.requests[0].headers.authorization],
     ['https://ai-gateway.vercel.sh/typesafe/v1/systemone', 'typesafe-ai/jev', 'Bearer gw-key'],
   );
+  assert.equal(halfCloudflare.requests[0].url, 'https://ai-gateway.vercel.sh/typesafe/v1/systemone');
   assert.equal(none.code, 2);
-  assert.equal(none.stderr.split('\n')[0], 'ask-jev: no API key, so Jev was not called. Set TYPESAFE_API_KEY or AI_GATEWAY_API_KEY in the environment that starts the agent.');
+  assert.equal(
+    none.stderr.split('\n')[0],
+    'ask-jev: no API key, so Jev was not called. Set TYPESAFE_API_KEY, or CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, or AI_GATEWAY_API_KEY in the environment that starts the agent.',
+  );
+});
+
+test('cloudflare nests the request under input and unwraps the result envelope', async () => {
+  const cwd = project({ 'a.ts': 'a' });
+  const request = { state: 'payouts failing', questions: { urgent: { type: 'noul', instructions: 'Is it urgent?' } } };
+  writeFileSync(join(cwd, 'req.json'), JSON.stringify(request));
+  const evaluation = { model: 'jev-1.13.0', answers: { urgent: { type: 'noul', noul: 0.9 } }, usage: { input_tokens: 1, output_tokens: 1 } };
+  const jev = fakeJev({
+    responses: [ok({ result: { state: 'Completed', result: evaluation, gatewayMetadata: {} }, success: true, errors: [], messages: [] })],
+  });
+
+  const result = await run(['ask', '--provider', 'cloudflare', 'req.json'], {
+    cwd,
+    jev,
+    env: { CLOUDFLARE_API_TOKEN: 'cf-token', CLOUDFLARE_ACCOUNT_ID: 'acct123' },
+  });
+
+  assert.equal(result.code, 0, result.stderr);
+  assert.deepEqual(jev.requests[0].body, { model: 'typesafe/jev', input: request });
+  assert.deepEqual(JSON.parse(result.stdout), evaluation);
+});
+
+test('an explicit provider requires all of its variables', async () => {
+  const cwd = project({ 'a.ts': 'a' });
+
+  const result = await run(['files', '--goal', 'x', '--provider', 'cloudflare', 'a.ts'], { cwd, env: { CLOUDFLARE_API_TOKEN: 'cf-token', TYPESAFE_API_KEY: 'ts' } });
+
+  assert.equal(result.code, 2);
+  assert.equal(result.stderr.split('\n')[0], 'ask-jev: no API key, so Jev was not called. Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the environment that starts the agent.');
 });
 
 test('refuses more than 300 candidates and asks to narrow', async () => {

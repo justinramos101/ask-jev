@@ -5,13 +5,35 @@ import { basename, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 
+// Each provider names the environment variables it needs, builds its URL from
+// them, wraps the {state, questions} request in its body format, and unwraps
+// the evaluation object ({model, answers, usage}) from its response.
 export const PROVIDERS = {
-  typesafe: { url: 'https://api.typesafe.ai/v1/systemone', keyEnv: 'TYPESAFE_API_KEY', model: 'jev-latest' },
+  typesafe: {
+    env: ['TYPESAFE_API_KEY'],
+    model: 'jev-latest',
+    url: () => 'https://api.typesafe.ai/v1/systemone',
+    body: (request, model) => ({ model, ...request }),
+    unwrap: (response) => response,
+  },
+  cloudflare: {
+    env: ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'],
+    model: 'typesafe/jev',
+    url: (env) => `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/ai/run`,
+    body: (request, model) => ({ model, input: request }),
+    unwrap: (response) => (isObject(response) && isObject(response.result) ? response.result.result : undefined),
+  },
   vercel: {
-    url: 'https://ai-gateway.vercel.sh/typesafe/v1/systemone', keyEnv: 'AI_GATEWAY_API_KEY', model: 'typesafe-ai/jev',
-    providerOptions: { gateway: { only: ['typesafe-ai'] } },
+    env: ['AI_GATEWAY_API_KEY'],
+    model: 'typesafe-ai/jev',
+    url: () => 'https://ai-gateway.vercel.sh/typesafe/v1/systemone',
+    // Restrict the gateway to TypeSafe; the model name alone does not select the hosting provider.
+    body: (request, model) => ({ model, ...request, providerOptions: { gateway: { only: ['typesafe-ai'] } } }),
+    unwrap: (response) => response,
   },
 };
+const AUTO_ORDER = ['typesafe', 'cloudflare', 'vercel'];
+const PROVIDER_FLAG = `--provider auto|${Object.keys(PROVIDERS).join('|')}`;
 
 const MAX_CANDIDATES = 300;
 const MAX_FILE_BYTES = 200 * 1024;
@@ -30,8 +52,8 @@ const LOCKFILES = new Set([
 const STATE_CONTEXT =
   'A coding assistant is choosing which files to read for the goal below. Each entry in `files` is one candidate: its path and the start of its content, with indentation stripped. Each question asks whether the assistant must read that file to accomplish the goal.';
 
-const USAGE = `Usage: node ask-jev.mjs ask <request.json|-> [--provider auto|typesafe|vercel] [--max-retries 0..5]
-       node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [--provider auto|typesafe|vercel] [--max-retries 0..5] <path|dir|glob>...`;
+const USAGE = `Usage: node ask-jev.mjs ask <request.json|-> [${PROVIDER_FLAG}] [--max-retries 0..5]
+       node ask-jev.mjs files --goal "<goal>" [--top 8] [--min 0.3] [${PROVIDER_FLAG}] [--max-retries 0..5] <path|dir|glob>...`;
 
 class InputError extends Error {
   constructor(message, showUsage = false) {
@@ -190,9 +212,8 @@ function inRange(value, maximum = 1) {
 }
 
 async function ask(request, access, io, maxRetries) {
-  const body = { model: access.model, ...request };
-  if (access.providerOptions) body.providerOptions = access.providerOptions;
-  const response = await postWithRetry(access, JSON.stringify(body), io, maxRetries);
+  const body = JSON.stringify(access.body(request, access.model));
+  const response = access.unwrap(await postWithRetry(access, body, io, maxRetries));
   if (!isObject(response) || !isObject(response.answers)) throw new Error('Jev returned no answers object');
   for (const [id, question] of Object.entries(request.questions)) {
     const answer = Object.hasOwn(response.answers, id) ? response.answers[id] : undefined;
@@ -215,12 +236,15 @@ async function ask(request, access, io, maxRetries) {
 }
 
 function pickProvider(choice, env) {
-  const order = choice === 'auto' ? ['typesafe', 'vercel'] : [choice];
+  const order = choice === 'auto' ? AUTO_ORDER : [choice];
   for (const name of order) {
-    const apiKey = env[PROVIDERS[name].keyEnv];
-    if (apiKey) return { ...PROVIDERS[name], apiKey };
+    const provider = PROVIDERS[name];
+    if (provider.env.every((variable) => env[variable])) {
+      return { name, model: provider.model, url: provider.url(env), body: provider.body, unwrap: provider.unwrap, apiKey: env[provider.env[0]] };
+    }
   }
-  throw new InputError(`no API key, so Jev was not called. Set ${order.map((name) => PROVIDERS[name].keyEnv).join(' or ')} in the environment that starts the agent.`);
+  const needed = order.map((name) => PROVIDERS[name].env.join(' and ')).join(', or ');
+  throw new InputError(`no API key, so Jev was not called. Set ${needed} in the environment that starts the agent.`);
 }
 
 function collectFiles(targets, cwd) {
@@ -448,7 +472,7 @@ function safeDiagnostic(value, apiKey, limit = 2000) {
 function httpFailure(access, response, text) {
   let payload;
   try { payload = JSON.parse(text); } catch { /* Some servers return plain text. */ }
-  const error = payload?.error ?? payload;
+  const error = payload?.error ?? (Array.isArray(payload?.errors) ? payload.errors[0] : undefined) ?? payload;
   const message = typeof error === 'string' ? error : error?.message;
   const parts = [safeDiagnostic(message ?? (text || '(empty response body)'), access.apiKey, 600)];
   const code = error?.type ?? error?.code;
