@@ -1,6 +1,6 @@
 # Check skill triggers
 
-Run native Codex tasks to measure whether the agent loads the intended Jev skills. This suite covers `ask-jev`, `jev-check-evidence`, and `jev-semantic-lint`. It complements the [file-discovery benchmark](../README.md) and each skill's decision fixtures.
+Run native Codex tasks to measure whether the agent loads the intended Jev skills. This suite covers `ask-jev`, `jev-check-evidence`, `jev-semantic-lint`, and `jev-router`. It complements the [file-discovery benchmark](../README.md) and each skill's decision fixtures.
 
 A successful trigger requires observable exposure to the installed skill body. Mentioning the skill in an answer or naming its runner in a command is not enough.
 

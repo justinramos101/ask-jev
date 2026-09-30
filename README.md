@@ -78,6 +78,24 @@ Ask your agent:
 
 The [semantic lint skill](skills/jev-semantic-lint/SKILL.md) distinguishes violations, compliance, inapplicable rules, and missing evidence. Its [workflow recipes](skills/jev-semantic-lint/references/workflows.md) cover skill authoring, agent failure analysis, eval rubric review, and artifact grading. Failure explanations remain hypotheses without discriminating evidence. Grading uses the supplied rubric rather than invented criteria.
 
+## Route delegated work to the right model
+
+Install `jev-router` alongside `ask-jev` to choose the model and reasoning effort before an agent spawns a subagent, worker, or reviewer:
+
+```sh
+npx skills add justinramos101/ask-jev --skill jev-router
+```
+
+For manual installation, copy the complete `skills/jev-router` directory into the same agent skills directory as `ask-jev`.
+
+The router detects whether the agent runs inside [Orca](https://orca.dev) or [Herdr](https://herdr.dev), probes which agent CLIs are installed, and asks Jev to pick a candidate and effort from its [model catalog](skills/jev-router/scripts/models.json). It prints the launch plan: a native in-process subagent when the choice shares the caller's CLI, the Orca or Herdr commands that start the agent in its own pane when it does not or when the task deserves a visible terminal, or one headless command otherwise. The calling agent runs the plan.
+
+Ask your agent:
+
+> Use jev-router to pick the model for this review, then start it in a separate pane and tell me what it chose.
+
+The [router skill](skills/jev-router/SKILL.md) describes the brief format and the placement rules. Edit the catalog to add or retire models; the router never proposes a model that is not listed or whose CLI is missing.
+
 ## Set an API key
 
 Set one of these in the environment that starts your agent. Keep the keys out of request files.

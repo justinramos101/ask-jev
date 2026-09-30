@@ -2,7 +2,8 @@
   "skills": [
     "ask-jev",
     "jev-check-evidence",
-    "jev-semantic-lint"
+    "jev-semantic-lint",
+    "jev-router"
   ],
   "cases": [
     {
@@ -40,8 +41,12 @@
       "files": {
         "home.json": "{\"request\":\"Have the room where we cook feel cozy by the time we eat tonight.\",\"rooms\":{\"kitchen\":\"cooking and meals\",\"study\":\"work\"},\"modes\":{\"eco\":\"minimal heating\",\"comfort\":\"comfortable occupied temperature\"},\"dinner_time\":\"18:00\",\"functions\":{\"set_mode\":[\"room\",\"mode\"],\"schedule_mode\":[\"room\",\"mode\",\"time\"]}}\n"
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "semantic-extraction",
@@ -50,8 +55,12 @@
       "files": {
         "thread.txt": "Vendor: The first estimate was $2,400 with $600 to reserve a slot. Customer: We added the extra room. Vendor: The revised total is $2,700. To hold the date, send $650 when you approve; the rest is due after installation. Customer: Approved, please hold that date."
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "structure-recovery",
@@ -60,8 +69,12 @@
       "files": {
         "handout.txt": "Before the workshop\nBring a laptop\nInstall the sample project\nThese steps let everyone start the exercises together.\nDuring the workshop\nPair with a neighbor\nCompare your results\nIf the sample fails, ask the facilitator for help.\n"
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "semantic-retrieval",
@@ -70,8 +83,12 @@
       "files": {
         "passages.json": "[{\"id\":\"archive\",\"text\":\"Archived projects stay searchable but disappear from the active list.\"},{\"id\":\"recover\",\"text\":\"Deleted documents remain in the recycle bin for thirty days. Restore returns them to their original folder.\"},{\"id\":\"redo\",\"text\":\"Redo reapplies the most recently reversed edit in the current document.\"}]\n"
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "reusable-features",
@@ -80,8 +97,12 @@
       "files": {
         "notes.json": "[{\"account\":\"A\",\"note\":\"We spend every Friday repairing exports. Another vendor is running a pilot with our team.\"},{\"account\":\"B\",\"note\":\"The support fix helped. Two more departments want access next quarter.\"}]\n"
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "stateful-interaction",
@@ -90,8 +111,12 @@
       "files": {
         "scene.json": "{\"goal\":\"Help a visitor enjoy the museum at their own pace\",\"previous_state\":\"The visitor asked for the long tour\",\"observations\":[\"Visitor now sits down and rubs their feet\",\"Visitor says: That is a lot to take in. Is there somewhere quiet nearby?\"],\"actions\":[\"continue_long_tour\",\"offer_quiet_seating\",\"start_interactive_quiz\"]}\n"
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "ai-feature-brainstorm",
@@ -100,8 +125,12 @@
       "files": {
         "app.md": "We maintain a shared reading app for small research clubs. Members save article excerpts, record open questions in ordinary language, and mark sessions as beginner or advanced. They want help connecting related excerpts and choosing what to discuss next. The app should keep the source text visible and avoid inventing article summaries."
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "replace-prompt-parse",
@@ -110,8 +139,12 @@
       "files": {
         "workflow.md": "Our app asks a text-generating LLM to output JSON with a feedback category and whether follow-up is needed, then repairs malformed JSON. Categories: bug, feature request, praise, other. Several categories can apply. Example: 'Love the new board, but dragging a card sometimes makes it disappear. Could you also add keyboard shortcuts?' Follow-up is warranted when the user reports a problem that needs diagnosis."
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "freeform-story",
@@ -136,8 +169,12 @@
       "files": {
         "article.json": "{\"audience\":\"Curious children and their parents trying stargazing for the first time\",\"purpose\":\"Help families enjoy finding familiar shapes in the night sky from their backyard without buying equipment\",\"titles\":[\"A Taxonomy of Observable Celestial Objects\",\"Your First Night-Sky Adventure Starts in the Backyard\",\"The Essential Telescope Buying Guide\"]}\n"
       },
-      "required": ["ask-jev"],
-      "allowed": ["ask-jev"]
+      "required": [
+        "ask-jev"
+      ],
+      "allowed": [
+        "ask-jev"
+      ]
     },
     {
       "id": "completion-audit",
@@ -455,6 +492,32 @@
       "prompt": "Change the heading \"Usage\" to \"Getting started\" in guide.md and leave the body unchanged.",
       "files": {
         "guide.md": "# Usage\n\nRun the supplied command to start the application.\n"
+      },
+      "required": [],
+      "allowed": []
+    },
+    {
+      "id": "delegate-review",
+      "split": "development",
+      "prompt": "Read task.md. Spawn a separate agent to do the review it describes, choosing whichever installed model fits, and tell me which model and effort you started it with. Do not do the review yourself.",
+      "files": {
+        "task.md": "Review the pending diff for correctness bugs and unhandled edge cases. The diff touches a payment reconciliation algorithm and is about 2,000 lines. The author used a Claude model, so the review should come from a different model family when one is installed. Quality matters more than cost."
+      },
+      "required": [
+        "jev-router",
+        "ask-jev"
+      ],
+      "allowed": [
+        "jev-router",
+        "ask-jev"
+      ]
+    },
+    {
+      "id": "named-model-worker",
+      "split": "holdout",
+      "prompt": "Start a subagent with the model gpt-5.5 at reasoning effort high to summarize notes.md in three sentences. Use exactly that model and effort.",
+      "files": {
+        "notes.md": "The migration moved user sessions from cookies to signed tokens. Rollout finished on Tuesday. No incidents were reported."
       },
       "required": [],
       "allowed": []

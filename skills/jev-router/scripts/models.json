@@ -1,0 +1,172 @@
+{
+  "efforts": ["low", "medium", "high", "xhigh", "max"],
+  "clis": {
+    "claude": {
+      "binary": "claude",
+      "herdrKind": "claude",
+      "efforts": ["low", "medium", "high", "xhigh", "max"],
+      "interactive": "claude --model {model} --effort {effort}",
+      "headless": "claude -p --model {model} --effort {effort} {prompt}"
+    },
+    "codex": {
+      "binary": "codex",
+      "herdrKind": "codex",
+      "efforts": ["low", "medium", "high", "xhigh"],
+      "interactive": "codex --model {model} -c model_reasoning_effort=\"{effort}\"",
+      "headless": "codex exec --model {model} -c model_reasoning_effort=\"{effort}\" {prompt}"
+    },
+    "gemini": {
+      "binary": "gemini",
+      "herdrKind": "gemini",
+      "efforts": [],
+      "interactive": "gemini --model {model}",
+      "headless": "gemini --model {model} -p {prompt}"
+    },
+    "opencode": {
+      "binary": "opencode",
+      "herdrKind": "opencode",
+      "efforts": ["low", "medium", "high", "max"],
+      "interactive": "opencode --model {model}",
+      "headless": "opencode run --model {model} --variant {effort} {prompt}"
+    },
+    "ollama": {
+      "binary": "ollama",
+      "herdrKind": null,
+      "efforts": [],
+      "interactive": "ollama run {model}",
+      "headless": "ollama run {model} {prompt}"
+    }
+  },
+  "candidates": [
+    {
+      "id": "claude_fable_5_1",
+      "cli": "claude",
+      "model": "claude-fable-5-1",
+      "tier": "frontier",
+      "cost": "highest",
+      "vision": true,
+      "agentic": true,
+      "notes": "Anthropic's most capable generally available model. Best for hard reasoning, long coherent edits, design judgment, and tasks that need the host's MCP tools."
+    },
+    {
+      "id": "claude_opus_5_5",
+      "cli": "claude",
+      "model": "claude-opus-5-5",
+      "tier": "frontier",
+      "cost": "high",
+      "vision": true,
+      "agentic": true,
+      "notes": "Strong general coding and reasoning at lower cost and latency than Fable."
+    },
+    {
+      "id": "claude_sonnet_5",
+      "cli": "claude",
+      "model": "claude-sonnet-5",
+      "tier": "strong",
+      "cost": "medium",
+      "vision": true,
+      "agentic": true,
+      "notes": "Fast and capable for routine implementation, tests, and refactors."
+    },
+    {
+      "id": "claude_haiku_4_5",
+      "cli": "claude",
+      "model": "claude-haiku-4-5-20251001",
+      "tier": "small",
+      "cost": "low",
+      "vision": true,
+      "agentic": true,
+      "notes": "Fastest Claude. Good for lookups, summaries, simple edits, and high-volume mechanical work."
+    },
+    {
+      "id": "codex_gpt_6_1_sol",
+      "cli": "codex",
+      "model": "gpt-6.1-sol",
+      "tier": "frontier",
+      "cost": "high",
+      "vision": true,
+      "agentic": true,
+      "notes": "OpenAI frontier coding agent. Strong at long autonomous coding runs and independent second opinions."
+    },
+    {
+      "id": "codex_gpt_6_astra",
+      "cli": "codex",
+      "model": "gpt-6-astra",
+      "tier": "frontier",
+      "cost": "high",
+      "vision": true,
+      "agentic": true,
+      "notes": "OpenAI frontier model with deep reasoning. Slower than sol."
+    },
+    {
+      "id": "codex_gpt_5_5",
+      "cli": "codex",
+      "model": "gpt-5.5",
+      "tier": "strong",
+      "cost": "medium",
+      "vision": true,
+      "agentic": true,
+      "notes": "Capable OpenAI coder at moderate cost."
+    },
+    {
+      "id": "gemini_pro",
+      "cli": "gemini",
+      "model": "gemini-3.5-pro",
+      "tier": "frontier",
+      "cost": "high",
+      "vision": true,
+      "agentic": true,
+      "notes": "Google frontier model with strong multimodal understanding and a very long context window."
+    },
+    {
+      "id": "gemini_flash",
+      "cli": "gemini",
+      "model": "gemini-3.5-flash",
+      "tier": "small",
+      "cost": "low",
+      "vision": true,
+      "agentic": true,
+      "notes": "Fast Google model for summaries, extraction, and simple edits."
+    },
+    {
+      "id": "opencode_grok_4_7",
+      "cli": "opencode",
+      "model": "cloudflare-ai-gateway/xai/grok-4.7",
+      "tier": "frontier",
+      "cost": "high",
+      "vision": true,
+      "agentic": true,
+      "notes": "xAI frontier reasoning model. Useful for an independent perspective."
+    },
+    {
+      "id": "opencode_deepseek_v4_pro",
+      "cli": "opencode",
+      "model": "deepseek/deepseek-v4-pro",
+      "tier": "strong",
+      "cost": "low",
+      "vision": false,
+      "agentic": true,
+      "notes": "Low-cost strong coder. No vision."
+    },
+    {
+      "id": "opencode_kimi_k3",
+      "cli": "opencode",
+      "model": "cloudflare-ai-gateway/moonshotai/kimi-k3",
+      "tier": "strong",
+      "cost": "low",
+      "vision": false,
+      "agentic": true,
+      "notes": "Low-cost long-context model good at agentic coding."
+    },
+    {
+      "id": "ollama_qwen3_5_9b",
+      "cli": "ollama",
+      "model": "qwen3.5:9b",
+      "tier": "local",
+      "cost": "free",
+      "vision": false,
+      "agentic": false,
+      "notes": "Runs locally with no data leaving the machine. Fine for drafts, classification, and short scripts. Not an agent and weak on long coherent output."
+    }
+  ]
+}

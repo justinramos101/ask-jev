@@ -1,0 +1,11 @@
+{
+	"task": "Review a 2,000-line pull request that rewrites the payment reconciliation algorithm. Find correctness bugs and unhandled edge cases. Read the diff and the existing tests; do not edit files.",
+	"context": "The PR author is a Claude model, so the reviewer should come from a different model family. The user wants to watch the review in a visible terminal.",
+	"constraints": {
+		"cost": "quality",
+		"needs_vision": false
+	},
+	"name": "reviewer",
+	"prompt": "Review the diff on this branch against main. Report only actionable correctness findings with file and line.",
+	"exclude": ["claude_fable_5_1", "claude_opus_5_5", "claude_sonnet_5", "claude_haiku_4_5"]
+}
